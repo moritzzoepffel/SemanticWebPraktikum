@@ -1,0 +1,7 @@
+<root, events, bell>
+<root, events, key>
+<key, param, valid>
+<valid, type, boolean>
+<root, properties, is_open>
+<is_open, type, boolean>
+<root, actions, unlock>

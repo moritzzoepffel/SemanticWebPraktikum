@@ -1,5 +1,7 @@
 # SemanticWebPraktikum
 
+## Python
+
 Executes Query on [linkedmdb.nt](linkedmdb.nt) database and writes response into file. 
 Then you can convert response into .dot file and afterwards create an svg image out of it.
 
@@ -15,3 +17,7 @@ python [path] -o test.dot response.ttl
 dot -Tsvg -o graph.svg test.dot
 ```
 * This sould create a [graph.svg](graph.svg) file which is a visualization of the query answer
+
+## JavaScript
+
+If you execute ```node index.js ``` it will take the JSON from the [response.txt](js/response.txt), parse it into the RDF format and save it in [rdffile.txt](js/rdffile.txt). 

@@ -1,0 +1,14 @@
+{
+  "events" : {
+    "bell": null, 
+    "key": {
+      "valid" : "boolean"
+    }
+  },
+  "properties" : {
+    "is_open" : "boolean"
+  },
+  "actions" : {
+    "unlock" : null
+  }
+}
