@@ -1,0 +1,264 @@
+<?php
+    // This Code part creates a php session with a cookie so we are able to track unique visitors and count them. A cookie is only valid for 6h or 21600 seconds.
+    session_set_cookie_params(21600); //6h 21600
+    session_start();
+?>
+<!DOCTYPE html>
+<html class="default-style" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Semantic Web Praktikum</title>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <link rel="icon" type="image/x-icon" href="./index.ico">
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+
+    <link rel="shortcut icon" type="image/x-icon" href="./index.ico">
+    <link rel="apple-touch-icon" href="./index.png">
+    <link rel="shortcut icon" href="./index.png" sizes="196x196">
+
+    <!-- Hier binden wir alle notwendigen Stylesheet dokumente ein, welche unter anderem Bootstrap - eine bekannte und beliebte Bibliothek enthalten -->
+    <link href="./style/css.css" rel="stylesheet">
+    <link rel="stylesheet" href="./style/main.css">
+    <link rel="stylesheet" href="./style/bootstrap-material.css">
+    <link rel="stylesheet" href="./style/shreerang-material.css">
+
+
+<body>
+<!-- Das hier ist die gesamte leere Struktur, welches das Gerüst für die Webseite baut. Diese Div Container sind zunächst leer und werden erst später durch d3 gefüllt -->
+<div class="layout-wrapper layout-1 layout-without-sidenav">
+    <div class="layout-inner">
+        <nav class="layout-navbar navbar navbar-expand-lg align-items-lg-center bg-dark" id="layout-navbar">
+            <div class="f-container">
+                <a href="" class="navbar-brand app-brand demo d-lg-none py-2 mr-4">
+                        <span class="app-brand-logo">
+                            <img src="./index.png" alt="Logo" width="100" height="100"
+                                 style="max-width:100%;height:auto;">
+                        </span>
+                    <span class="app-brand-text font-weight-bold ml-3">RDF Film Database</span>
+                </a>
+            </div>
+        </nav>
+
+        <div class="f-container f-flex-grow-1 f-padding-y">
+            <h4 class="font-weight-bold py-3 mb-0">Semantic Web Praktikum</h4>
+
+
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card mb-4">
+                        <div class="card-header with-elements">
+                            <h6 class="card-header-title mb-0">Auswahl des Films</h6>
+                        </div>
+
+                        <div class="card-body mb-0 text-muted overflow-auto" id="rules"
+                             style="text-align: justify; -ms-overflow-style: none;">
+                            <p class="font-weight-bold">
+                                Bitte einen Filmtitel eingeben und anschließend auf Submit klicken!
+                            </p>
+                            <form action="javascript:showSVG()">
+                                <label class="label mb-1 font-weight-bold" for="filmName">Filmtitel</label><br>
+                                <input class="col-lg-4" type="text" id="filmName" name="fname"><br><br>
+                                <input type="submit" id="btn1" value="Submit">
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="row">
+                <div class="col">
+                    <div class="card mb-4">
+                        <div class="card-header with-elements">
+                            <h6 class="card-header-title mb-0">RDF Graph</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-lg-12 mb-4">
+                                    <div id="graph_scatter_global_1"></div>
+                                </div>
+
+                            </div>
+                            <div id="button_scatter_global"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <nav class="layout-footer footer footer-light">
+            <div class="f-container-fluid d-flex flex-wrap justify-content-between text-center f-container-p-x pb-3">
+                <div class="pt-3">
+
+                </div>
+                <span class="pt-3">Alle Rechte vorbehalten. Richtigkeit sowie Aktualität nicht gewährleistet.</span>
+                <!--div>
+                    <a href="" class="footer-link pt-3">About Us</a>
+                    <a href="" class="footer-link pt-3 ml-4">Help</a>
+                    <a href="" class="footer-link pt-3 ml-4">Contact</a>
+                    <a href="" class="footer-link pt-3 ml-4">Terms &amp; Conditions</a>
+                </div-->
+            </div>
+        </nav>
+
+    </div>
+</div>
+
+
+<script>
+    function showSVG() {
+        const width = "100%";
+        const height = "100%";
+
+        d3.select("svg").remove();
+
+        const svg = d3.select("#graph_scatter_global_1").append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+
+        const img = svg.append("svg:image")
+            .attr("xlink:href", "./python/graph.svg")
+            .attr("width", "100%")
+            .attr("height", "100%")
+            .attr("x", 0)
+            .attr("y", 0);
+    }
+
+</script>
+
+
+<!-- Hier beginnt der eigentliche JavaScript Codeteil, welcher für die Darstellung verantwortlich ist. -->
+<script>
+    //Konstanten, welche die Pfade zu den Datensätzen, die täglich aktualisiert werden, bestimmen.
+    const data_geo_bl = "./datasets/json/geodata/geodata_BL.json";
+    const data_geo_lk = "./datasets/json/geodata/geodata_LK.json";
+    const data_dir_rules = "./datasets/json/rules/";
+    const data_rki_impfung_quote = "./datasets/json/rki/Quote.json";
+    const data_rki_impfung_stoff = "./datasets/json/rki/Stoff.json";
+    const data_rki_inzidenz_lk_x = "./datasets/json/rki/Inzidenz_LK_x.json";
+    const data_rki_inzidenz_bl = "./datasets/json/rki/Inzidenz_BL.json";
+    const data_rki_fall_lk_x = "./datasets/json/rki/Fall_LK_x.json";
+    const data_gen_bl = "./datasets/json/general/Info_BL.json";
+    const data_gen_lk = "./datasets/json/general/Info_LK.json";
+    const data_ag_fall_x = "./datasets/json/rki/Fall_AG_x.json";
+    const data_ag_inzidenz_x = "./datasets/json/rki/Inzidenz_AG_x.json";
+    const data_rki_tode = "./datasets/json/rki/TodeAG.json";
+    const data_rki_tode_x = "./datasets/json/rki/TodeAG_x.json";
+
+    // Diese Funktion wandelt ein gegebenes Datum von der Datumfunktion in typische Datumsangabenform in Deutschland als String zurück
+    function stringFromDate(date) {
+        return String(date.getDate()).padStart(2, '0') + "." + String(date.getMonth() + 1).padStart(2, '0') + "." + date.getFullYear();
+    }
+
+    // Defaultwerte, welche verwendet werden wenn keine Benutzereingabe zum Landkreis o.ä. erfolgte
+    const data_obj_bl = "Bayern";
+    const data_obj_bl_short = "BY";
+    const data_obj_city = "Freising";
+    const data_obj_ags = "09178";
+    const data_obj_ags_bl = "09";
+
+    // data_obj_date enthält nun das heutige Datum als String zur Weiterverarbeitung
+    const today = new Date();
+    today.setHours(today.getHours() - 10);
+    const data_obj_date = stringFromDate(today);
+
+
+    //Datensätze und Farbstruktur festlegen
+    const inzidenzPromise = d3.json(data_rki_inzidenz_lk_x);
+    const ag_colors = ['#fff100', '#ff8c00', '#e81123', '#ec008c', '#68217a', '#00188f', '#00bcf2', '#00b294', '#009e49', '#bad80a'];
+</script>
+
+<script src="./js/utils.js"></script>
+
+<script>
+    setDisplayData(data_obj_city, data_obj_ags, data_obj_ags.substring(0, 2), data_obj_date);
+    d3.select("#title_lk_inzidenz").text("(Stand: " + data_obj_date + ")");
+</script>
+
+<!-- Um effektiv Code zu trennen, haben wir die verschiedenen Codefunktionen in unterschiedlichen Dateien gespeichert. Hier werden alle Codeteile zusammengeführt -->
+<script src="./js/graph_inzidenz_bl.js"></script>
+<script src="./js/graph_deutschland_lk.js"></script>
+<script src="./js/graph_altersgruppe_fall.js"></script>
+<script src="./js/graph_altersgruppe_inzidenz.js"></script>
+<script src="./js/graph_tode_letzte_woche.js"></script>
+<script src="./js/graph_tode_verlauf.js"></script>
+<script src="./js/graph_impfstoff_distribution.js"></script>
+<script src="./js/graph_herdenimmun.js"></script>
+<script src="./js/graph_scatter.js"></script>
+
+<!--Impfterminrechner-->
+<script>
+    // Wenn ein User die Eingaben ausgefüllt hat und den Rechner startet, wird diese Funktion ausgeführt
+    d3.select('#submitter')
+        .on("click", function () {
+            var dom_result = d3.select("#termin_result");
+
+            // Überprüfe zunächst, ob alle notwendigen Inputfelder sorgfältig ausgefüllt wurden
+            if (document.querySelector('input[name="vName"]').value.length == 0 || document.querySelector('input[name="nName"]').value.length == 0) {
+                // Wenn das NICHT der Fall ist, gib eine Fehlermeldung zurück.
+                dom_result.text("Bitte Namen eintragen.");
+            } else if (document.querySelector('input[name="termin"]').value.length == 0) {
+                // Ist der Impftermin nicht korrekt eingetragen, gib eine Fehlermeldung zurück
+                dom_result.text("Bitte Erstimpfungstermin eintragen.");
+            } else {
+                // Alle Felder wurden korrekt ausgefüllt. Starte die Berechnung
+                var selectedVName = document.querySelector('input[name="vName"]').value;
+                var selectedNName = document.querySelector('input[name="nName"]').value;
+                var selectedVax = document.querySelector('input[name="vax"]:checked').value;
+                var selectedDate = document.querySelector('input[name="termin"]').value;
+                var firstDate = new Date(Date.parse(selectedDate));
+
+                // Baue das HTML Snippet, welches die berechneten Informationen enthält und fülle es mit den Userdaten.
+                var result = '<table style="width:100%;"><tbody style="width:100%;"><tr><td align="left">Name:</td><td align="right">' + selectedVName + ' ' + selectedNName + '</td></tr><tr><td align="left">Impfstoff:</td><td align="right">' + selectedVax + '</td></tr><tr><td align="left">Erste Impfung:</td><td align="right">' + stringFromDate(firstDate) + '</td></tr>';
+
+                if (selectedVax == "Johnson&Johnson") {
+                    result += '<tr><td align="left">Zweite Impfung:</td><td align="right">Ihr ausgewählter Impfstoff benötigt keine zweite Impfung.</td></tr>';
+                    result += '<tr><td align="left">Vollständig geimpft:</td><td align="right">' + stringFromDate(new Date(firstDate.setDate(firstDate.getDate() + 15))) + '</td></tr>';
+                } else {
+                    var secondDate = calculateSecondDose(Date.parse(selectedDate), selectedVax);
+                    result += '<tr><td align="left">Zweite Impfung:</td><td align="right">' + stringFromDate(secondDate) + "</td></tr>";
+                    result += '<tr><td align="left">Vollständig geimpft:</td><td align="right">' + stringFromDate(new Date(secondDate.setDate(secondDate.getDate() + 15))) + "</td></tr>";
+                }
+                result += "</tbody></table>";
+
+                // Führe das HTML Snippet aus
+                dom_result.html(result);
+            }
+
+            // Helferfunktionen, welche zur Berechnung der Zweitdosis nötig sind
+            function calculateSecondDose(date, vax) {
+                var resultDate = new Date(date);
+                var period = vaxPeriod(vax);
+                resultDate.setDate(resultDate.getDate() + period);
+
+                return resultDate;
+            }
+
+            // Die verschiedenen Impfstoffe haben verschiedene Wartedauer zwischen der Erst- und Zweitimpfung, welche hier hinterlegt werden.
+            function vaxPeriod(vax) {
+                switch (vax) {
+                    case "Biontech":
+                        return 42;
+                        break;
+                    case "Moderna":
+                        return 42;
+                        break;
+                    case "Astrazeneca":
+                        return 84;
+                        break;
+                    case defaultStatus:
+                        alert("Unbekannter Impfstoff gewählt")
+                        break;
+                }
+            }
+
+        });
+</script>
+</body>
+</html>
