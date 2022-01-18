@@ -1,7 +1,7 @@
 const fs = require('fs')
 const x = 'abc';
 
-fs.readFile('response.txt', (err, data) => {
+fs.readFile('js/response.txt', (err, data) => {
     if (err) {
         throw err;
     }
@@ -23,7 +23,7 @@ function progressData(data) {
 
 function writeRDFFile(data) {
     console.log('writing');
-    fs.writeFile('rdffile.txt', data, (err) => {
+    fs.writeFile('js/rdffile.txt', data, (err) => {
         if (err) throw err;
     })
 }
