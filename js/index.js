@@ -17,16 +17,9 @@ function progressData(data) {
     var comment = "";
     rdf = triplify(url, json, comment);
     console.log('\n' + rdf)
-
-    writeRDFFile(rdf);
+    return rdf;
 }
 
-function writeRDFFile(data) {
-    console.log('writing');
-    fs.writeFile('js/rdffile.txt', data, (err) => {
-        if (err) throw err;
-    })
-}
 
 
 function triplify(url, obj, s) {
