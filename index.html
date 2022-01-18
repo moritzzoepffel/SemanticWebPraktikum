@@ -22,6 +22,8 @@
     <link rel="stylesheet" href="./style/bootstrap-material.css">
     <link rel="stylesheet" href="./style/shreerang-material.css">
 
+    <!--    <script id="js2" type="text/javascript" src="js/index.js"></script>-->
+
 
 <body>
 <!-- Das hier ist die gesamte leere Struktur, welches das Gerüst für die Webseite baut. Diese Div Container sind zunächst leer und werden erst später durch d3 gefüllt -->
@@ -55,7 +57,7 @@
                             <p class="font-weight-bold">
                                 Bitte einen Filmtitel eingeben und anschließend auf Submit klicken!
                             </p>
-                            <form action="javascript:showSVG()">
+                            <form action="javascript:getJSONFromAPI()">
                                 <label class="label mb-1 font-weight-bold" for="filmName">Filmtitel</label><br>
                                 <input class="col-lg-4" type="text" id="filmName" name="fname"><br><br>
                                 <input type="submit" id="btn1" value="Submit">
@@ -76,6 +78,9 @@
                             <div class="row">
                                 <div class="col-lg-12 mb-4">
                                     <div id="graph_scatter_global_1"></div>
+                                </div>
+                                <div class="col-lg-12 mb-4">
+                                    <p id="graph_scatter_global_2"></p>
                                 </div>
 
                             </div>
@@ -104,7 +109,6 @@
     </div>
 </div>
 
-
 <script>
     function showSVG() {
         const width = "100%";
@@ -123,6 +127,199 @@
             .attr("height", "100%")
             .attr("x", 0)
             .attr("y", 0);
+    }
+
+
+    function getJSONFromAPI() {
+        const filmTitle = document.getElementById('filmName').value;
+        const url = "http://www.omdbapi.com/?apikey=faeed64f&t=" + filmTitle;
+        console.log(url)
+        fetch(url)
+            .then(function (response) {
+                if (response.status >= 400) {
+                    throw new Error("Bad response from server");
+                }
+                return response.json();
+            })
+            .then(function (stories) {
+                var res = JSON.stringify(stories).toString();
+                var progData = progressData(res);
+                console.log(res);
+                console.log(progData);
+                document.getElementById('graph_scatter_global_2').innerHTML = "<xmp>" + progData + "</xmp>"
+            });
+
+
+    }
+
+    function progressData(data) {
+        console.log('progressing');
+        var json = JSON.parse(data);
+        var url = "root";
+        var comment = "";
+        rdf = triplify(url, json, comment);
+        console.log('\n' + rdf)
+        return rdf;
+    }
+
+
+    function triplify(url, obj, s) {
+        if (typeof obj === "object") {
+            for (var i in obj) {
+                if (i === "events") s += map_events(url, obj, i); else if (i === "properties") s += map_properties(url, obj, i); else if (i === "actions") s += map_actions(url, obj, i); else s += map_field(url, obj, i);
+            }
+        }
+        return s;
+    }
+
+    function map_events(url, obj, i) {
+        var value = obj[i];
+
+        if (typeof value === "string") {
+            return '<' + url + ', ' + i + ', ' + value + '>\n';
+        }
+
+        if (typeof value === "number") {
+            return '<' + url + ', ' + i + ', ' + value + '>\n';
+        }
+
+        if (typeof value === "object") {
+            var s = "";
+            for (var j in value) {
+                s += '<' + url + ', ' + i + ', ' + j + '>\n';
+                if (typeof value[j] === "string") s += '<' + j + ', type, ' + value[j] + '>\n'; else if (typeof value[j] === "object") {
+                    for (var k in value[j]) {
+                        s += '<' + j + ', param, ' + k + '>\n';
+                        if (typeof value[j][k] === "string") s += '<' + k + ', type, ' + value[j][k] + '>\n';
+                    }
+                }
+            }
+            return s;
+        }
+
+        if (typeof value === "array") {
+            return '<' + url + ', ' + i + ', ' + value + '>\n';
+        }
+
+        if (value == null) {
+            return '<' + url + ', ' + i + ', ' + 'null' + '>\n';
+        }
+    }
+
+    function map_properties(url, obj, i) {
+        var value = obj[i];
+
+        if (typeof value === "string") {
+            return '<' + url + ', ' + i + ', ' + value + '>\n';
+        }
+
+        if (typeof value === "number") {
+            return '<' + url + ', ' + i + ', ' + value + '>\n';
+        }
+
+        if (typeof value === "object") {
+            var s = "";
+            for (var j in value) {
+                s += '<' + url + ', ' + i + ', ' + j + '>\n';
+                if (typeof value[j] === "string") s += '<' + j + ', type, ' + value[j] + '>\n'; else if (typeof value[j] === "object") {
+                    for (var k in value[j]) {
+                        var field = value[j];
+                        var fvalue = field[k];
+                        if (typeof (value[j][k]) === "object") {
+                            for (var l in fvalue) {
+                                s += '<' + j + ', ' + 'property' + ', ' + l + '>\n';
+                                s += '<' + l + ', ' + 'type' + ', ' + fvalue[l] + '>\n';
+                            }
+                        } else s += '<' + j + ', ' + k + ', ' + value[j][k] + '>\n';
+                    }
+                }
+            }
+            return s;
+        }
+
+        if (typeof value === "array") {
+            return '<' + url + ', ' + i + ', ' + value + '>\n';
+        }
+
+        if (value == null) {
+            return '<' + url + ', ' + i + ', ' + 'null' + '>\n';
+        }
+    }
+
+    function map_actions(url, obj, i) {
+        var value = obj[i];
+
+        if (typeof value === "string") {
+            return '<' + url + ', ' + i + ', ' + value + '>\n';
+        }
+
+        if (typeof value === "number") {
+            return '<' + url + ', ' + i + ', ' + value + '>\n';
+        }
+
+        if (typeof value === "object") {
+            var s = "";
+            for (var j in value) {
+                s += '<' + url + ', ' + i + ', ' + j + '>\n';
+                if (typeof value[j] === "string") s += '<' + j + ', type, ' + value[j] + '>\n'; else if (typeof value[j] === "object") {
+                    for (var k in value[j]) {
+                        var field = value[j];
+                        var fvalue = field[k];
+                        if (typeof fvalue === "object") {
+                            for (var l in fvalue) {
+                                s += '<' + j + ', ' + k + ', ' + l + '>\n';
+                                s += '<' + l + ', ' + 'type' + ', ' + fvalue[l] + '>\n';
+                            }
+                        } else s += '<' + j + ', ' + k + ', ' + value[j][k] + '>\n';
+                    }
+                }
+            }
+            return s;
+        }
+
+        if (typeof value === "array") {
+            return '<' + url + ', ' + i + ', ' + value + '>\n';
+        }
+
+        if (value == null) {
+            return '<' + url + ', ' + i + ', ' + 'null' + '>\n';
+        }
+    }
+
+    function map_field(url, obj, i) {
+        var value = obj[i];
+
+        if (i === "@context") return "";
+
+        if (typeof value === "string") {
+            return '<' + url + ', ' + i + ', ' + value + '>\n';
+        }
+
+        if (typeof value === "number") {
+            return '<' + url + ', ' + i + ', ' + value + '>\n';
+        }
+
+        if (typeof value === "object") {
+            var s = "";
+            for (var j in value) {
+                s += '<' + url + ', ' + i + ', ' + j + '>\n';
+                if (typeof value[j] === "string") s += '<' + j + ', type, ' + value[j] + '>\n'; else if (typeof value[j] === "object") {
+                    for (var k in value[j]) {
+                        s += '<' + j + ', param, ' + k + '>\n';
+                        if (typeof value[j][k] === "string") s += '<' + k + ', type, ' + value[j][k] + '>\n';
+                    }
+                }
+            }
+            return s;
+        }
+
+        if (typeof value === "array") {
+            return '<' + url + ', ' + i + ', ' + value + '>\n';
+        }
+
+        if (value == null) {
+            return '<' + url + ', ' + i + ', ' + 'null' + '>\n';
+        }
     }
 
 </script>
