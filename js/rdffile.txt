@@ -1,7 +1,39 @@
-<root, events, bell>
-<root, events, key>
-<key, param, valid>
-<valid, type, boolean>
-<root, properties, is_open>
-<is_open, type, boolean>
-<root, actions, unlock>
+<Goldfinger, Title, Goldfinger>
+<Goldfinger, Year, 1964>
+<Goldfinger, Rated, PG>
+<Goldfinger, Released, 09 Jan 1965>
+<Goldfinger, Runtime, 110 min>
+<Goldfinger, Genre, Action, Adventure, Thriller>
+<Goldfinger, Director, Guy Hamilton>
+<Goldfinger, Writer, Richard Maibaum, Paul Dehn, Ian Fleming>
+<Goldfinger, Actors, Sean Connery, Gert Fröbe, Honor Blackman>
+<Goldfinger, Plot, While investigating a gold magnate's smuggling, James Bond uncovers a plot to contaminate the Fort Knox gold reserve.>
+<Goldfinger, Language, English, Chinese, Spanish>
+<Goldfinger, Country, United Kingdom>
+<Goldfinger, Awards, Won 1 Oscar. 6 wins & 6 nominations total>
+<Goldfinger, Poster, https://m.media-amazon.com/images/M/MV5BMTQ2MzE0OTU3NV5BMl5BanBnXkFtZTcwNjQxNTgzNA@@._V1_SX300.jpg>
+<Goldfinger, Ratings, 0>
+<0, param, Source>
+<Source, type, Internet Movie Database>
+<0, param, Value>
+<Value, type, 7.7/10>
+<Goldfinger, Ratings, 1>
+<1, param, Source>
+<Source, type, Rotten Tomatoes>
+<1, param, Value>
+<Value, type, 99%>
+<Goldfinger, Ratings, 2>
+<2, param, Source>
+<Source, type, Metacritic>
+<2, param, Value>
+<Value, type, 87/100>
+<Goldfinger, Metascore, 87>
+<Goldfinger, imdbRating, 7.7>
+<Goldfinger, imdbVotes, 184,450>
+<Goldfinger, imdbID, tt0058150>
+<Goldfinger, Type, movie>
+<Goldfinger, DVD, 07 Nov 2006>
+<Goldfinger, BoxOffice, $51,081,062>
+<Goldfinger, Production, N/A>
+<Goldfinger, Website, N/A>
+<Goldfinger, Response, True>

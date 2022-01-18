@@ -13,7 +13,7 @@ fs.readFile('js/response.txt', (err, data) => {
 function progressData(data) {
     console.log('progressing');
     var json = JSON.parse(data);
-    var url = "root";
+    var url = json['Title'];
     var comment = "";
     rdf = triplify(url, json, comment);
     console.log('\n' + rdf)
