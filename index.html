@@ -132,6 +132,10 @@
 
     function getJSONFromAPI() {
         const filmTitle = document.getElementById('filmName').value;
+        if (filmTitle == "") {
+            document.getElementById('graph_scatter_global_2').innerHTML = "Please type in a Movie Name";
+            return;
+        }
         const url = "http://www.omdbapi.com/?apikey=faeed64f&t=" + filmTitle;
         console.log(url)
         fetch(url)
