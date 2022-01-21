@@ -1,6 +1,5 @@
 const jsonld = require('jsonld');
 
-
 document.getElementById('btn1').addEventListener("click", async function () {
     const filmTitle = document.getElementById('filmName').value;
     if (filmTitle == "") {
@@ -23,7 +22,7 @@ document.getElementById('btn1').addEventListener("click", async function () {
     console.log(res)
     console.log(response);
     const quads = await jsonld.toRDF(response, {format: 'application/n-quads'});
-    document.getElementById('n-quads_container').innerHTML = "<xmp>" + quads + "</xmp>";
+    document.getElementById('n-quads_container').innerHTML = "<xmp>" + quads + "</xmp>"; //TODO Check ob automatischer Zeilenumbruch verfügbar
     d3.json(res, (err, data) => {
         if (err) return console.warn(err);
         d3.jsonldvis(data, 'graph_scatter_global_2', {w: 800, h: 600, maxLabelWidth: 250});
