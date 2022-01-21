@@ -22,8 +22,6 @@
     <link rel="stylesheet" href="./style/bootstrap-material.css">
     <link rel="stylesheet" href="./style/shreerang-material.css">
 
-    <script id="js2" src="js/index.js"></script>
-
 
 <body>
 <!-- Das hier ist die gesamte leere Struktur, welches das Gerüst für die Webseite baut. Diese Div Container sind zunächst leer und werden erst später durch d3 gefüllt -->
@@ -57,10 +55,10 @@
                             <p class="font-weight-bold">
                                 Bitte einen Filmtitel eingeben und anschließend auf Submit klicken!
                             </p>
-                            <form action="javascript:getJSONFromAPI()">
+                            <form>
                                 <label class="label mb-1 font-weight-bold" for="filmName">Filmtitel</label><br>
                                 <input class="col-lg-4" type="text" id="filmName" name="fname"><br><br>
-                                <input type="submit" id="btn1" value="Submit">
+                                <input type="Button" id="btn1" value="Submit">
                             </form>
                         </div>
                     </div>
@@ -72,19 +70,31 @@
                 <div class="col">
                     <div class="card mb-4">
                         <div class="card-header with-elements">
+                            <h6 class="card-header-title mb-0">N-Quads</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-lg-12 mb-4">
+                                    <div id="n-quads_container"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <div class="card mb-4">
+                        <div class="card-header with-elements">
                             <h6 class="card-header-title mb-0">RDF Graph</h6>
                         </div>
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-lg-12 mb-4">
-                                    <div id="graph_scatter_global_1"></div>
+                                    <p id="graph_scatter_1"></p>
                                 </div>
-                                <div class="col-lg-12 mb-4">
-                                    <p id="graph_scatter_global_2"></p>
-                                </div>
-
                             </div>
-                            <div id="button_scatter_global"></div>
                         </div>
                     </div>
                 </div>
@@ -109,53 +119,9 @@
     </div>
 </div>
 
-<script>
-    function showSVG() {
-        const width = "100%";
-        const height = "100%";
-
-        d3.select("svg").remove();
-
-        const svg = d3.select("#graph_scatter_global_1").append("svg")
-            .attr("width", width)
-            .attr("height", height);
+<!-- Hier binden wir alle notwendigen Script dokumente ein -->
+<script src="bundle.js"></script>
 
 
-        const img = svg.append("svg:image")
-            .attr("xlink:href", "./python/graph.svg")
-            .attr("width", "100%")
-            .attr("height", "100%")
-            .attr("x", 0)
-            .attr("y", 0);
-    }
-
-
-    function getJSONFromAPI() {
-        const filmTitle = document.getElementById('filmName').value;
-        if (filmTitle == "") {
-            document.getElementById('graph_scatter_global_2').innerHTML = "Please type in a Movie Name";
-            return;
-        }
-        const url = "http://www.omdbapi.com/?apikey=faeed64f&t=" + filmTitle;
-        console.log(url)
-        fetch(url)
-            .then(function (response) {
-                if (response.status >= 400) {
-                    throw new Error("Bad response from server");
-                }
-                return response.json();
-            })
-            .then(function (stories) {
-                var res = JSON.stringify(stories).toString();
-                var progData = progressData(res);
-                console.log(res);
-                console.log(progData);
-                document.getElementById('graph_scatter_global_2').innerHTML = "<xmp>" + progData + "</xmp>"
-            });
-
-
-    }
-
-</script>
 </body>
 </html>

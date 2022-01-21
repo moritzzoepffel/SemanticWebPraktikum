@@ -1,14 +1,16 @@
 const fs = require('fs')
 const x = 'abc';
 
-fs.readFile('js/response.txt', (err, data) => {
-    if (err) {
-        throw err;
-    }
-    console.log('reading');
-    progressData(data.toString());
+function read() {
+    fs.readFile('js/response.txt', (err, data) => {
+        if (err) {
+            throw err;
+        }
+        console.log('reading');
+        progressData(data.toString());
 
-})
+    });
+}
 
 function progressData(data) {
     console.log('progressing');
@@ -19,7 +21,6 @@ function progressData(data) {
     console.log('\n' + rdf)
     return rdf;
 }
-
 
 
 function triplify(url, obj, s) {
