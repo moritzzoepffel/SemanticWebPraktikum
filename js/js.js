@@ -9,7 +9,7 @@ const jsonld = require('jsonld');
 //TODO https://json-ld.org/playground/
 
 
-document.getElementById('btn1').addEventListener("click", async function () {
+document.getElementById('btn1').addEventListener("click", async function () { //TODO Second EventListener for Enter
     const filmTitle = document.getElementById('filmName').value;
     if (filmTitle == "") {
         document.getElementById('n-quads_container').innerHTML = "Please type in a Movie Name";
