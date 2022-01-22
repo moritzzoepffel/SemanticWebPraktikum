@@ -1,5 +1,14 @@
 const jsonld = require('jsonld');
 
+//TODO https://github.com/digitalbazaar/jsonld.js Dropdown with different view options
+//TODO Build SVG in external python file/javascript
+//TODO https://github.com/dherault/semantic-graphql#resolvers
+//TODO https://issemantic.net/rdf-visualizer
+//TODO https://www.easyrdf.org/docs/rdf-formats-json
+//TODO https://www.ldf.fi/service/rdf-grapher
+//TODO https://json-ld.org/playground/
+
+
 document.getElementById('btn1').addEventListener("click", async function () {
     const filmTitle = document.getElementById('filmName').value;
     if (filmTitle == "") {
