@@ -7,6 +7,7 @@ const jsonld = require('jsonld');
 //TODO https://www.easyrdf.org/docs/rdf-formats-json
 //TODO https://www.ldf.fi/service/rdf-grapher
 //TODO https://json-ld.org/playground/
+//TODO https://github.com/alangrafu/visualRDF
 
 
 document.getElementById('btn1').addEventListener("click", async function () { //TODO Second EventListener for Enter
