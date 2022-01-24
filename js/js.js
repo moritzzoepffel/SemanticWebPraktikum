@@ -45,7 +45,6 @@ async function getMovie() {
     console.log(res)
     console.log(response);
     quads = await jsonld.toRDF(response, { format: 'application/n-quads' });
-    console.log(quads);
     quads = format_quads(quads, filmTitle);
     document.getElementById('n-quads_container').innerHTML = "<p style=\"white-space: pre-wrap\">" + quads + "</p>"; //TODO Check ob automatischer Zeilenumbruch verfügbar
     d3.json(res, (err, data) => {
@@ -57,7 +56,7 @@ async function getMovie() {
 
 
 function format_quads(text, filmTitle){
-    //text = text.replace(/_:b0/gi, filmTitle);   // <- replaces _:b0 with the movie title
+    text = text.replace(/_:b0/gi, '&lt;' + filmTitle + '&gt;');   
     text = text.replace(/</gi,'&lt;');
     text = text.replace(/>/gi,'&gt;');
     return text;
