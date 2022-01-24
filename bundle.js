@@ -267,6 +267,7 @@ exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate :
 }).call(this)}).call(this,require("timers").setImmediate,require("timers").clearImmediate)
 },{"process/browser.js":2,"timers":3}],4:[function(require,module,exports){
 const jsonld = require('jsonld');
+const { getInitialContext } = require('jsonld/lib/context');
 
 //TODO https://github.com/digitalbazaar/jsonld.js Dropdown with different view options
 //TODO Build SVG in external python file/javascript
@@ -285,7 +286,6 @@ document.getElementById('btn1').addEventListener("click", async function () {
 
 
 document.getElementById('form1').onsubmit = function(e){
-    console.log("Tried to submit!");
     e.preventDefault();
     getMovie();
 }
@@ -312,14 +312,25 @@ async function getMovie() {
     let res = JSON.stringify(response).toString();
     console.log(res)
     console.log(response);
-    const quads = await jsonld.toRDF(response, { format: 'application/n-quads' });
-    document.getElementById('n-quads_container').innerHTML = "<xmp>" + quads + "</xmp>"; //TODO Check ob automatischer Zeilenumbruch verfügbar
+    quads = await jsonld.toRDF(response, { format: 'application/n-quads' });
+    console.log(quads);
+    quads = format_quads(quads, filmTitle);
+    document.getElementById('n-quads_container').innerHTML = "<p style=\"white-space: pre-wrap\">" + quads + "</p>"; //TODO Check ob automatischer Zeilenumbruch verfügbar
     d3.json(res, (err, data) => {
         if (err) return console.warn(err);
         d3.jsonldvis(data, 'graph_scatter_global_2', { w: 800, h: 600, maxLabelWidth: 250 });
     });
 }
-},{"jsonld":21}],5:[function(require,module,exports){
+
+
+
+function format_quads(text, filmTitle){
+    //text = text.replace(/_:b0/gi, filmTitle);   // <- replaces _:b0 with the movie title
+    text = text.replace(/</gi,'&lt;');
+    text = text.replace(/>/gi,'&gt;');
+    return text;
+}
+},{"jsonld":21,"jsonld/lib/context":14}],5:[function(require,module,exports){
 /* jshint esversion: 6 */
 /* jslint node: true */
 'use strict';
