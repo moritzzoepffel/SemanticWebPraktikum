@@ -10,7 +10,19 @@ const jsonld = require('jsonld');
 //TODO https://github.com/alangrafu/visualRDF
 
 
-document.getElementById('btn1').addEventListener("click", async function () { //TODO Second EventListener for Enter
+document.getElementById('btn1').addEventListener("click", async function () {
+    console.log("Button was pressed.");
+    getMovie();
+});
+
+
+document.getElementById('form1').onsubmit = function(e){
+    e.preventDefault();
+    getMovie();
+}
+
+
+async function getMovie() {
     const filmTitle = document.getElementById('filmName').value;
     if (filmTitle == "") {
         document.getElementById('n-quads_container').innerHTML = "Please type in a Movie Name";
@@ -31,12 +43,10 @@ document.getElementById('btn1').addEventListener("click", async function () { //
     let res = JSON.stringify(response).toString();
     console.log(res)
     console.log(response);
-    const quads = await jsonld.toRDF(response, {format: 'application/n-quads'});
+    const quads = await jsonld.toRDF(response, { format: 'application/n-quads' });
     document.getElementById('n-quads_container').innerHTML = "<xmp>" + quads + "</xmp>"; //TODO Check ob automatischer Zeilenumbruch verfügbar
     d3.json(res, (err, data) => {
         if (err) return console.warn(err);
-        d3.jsonldvis(data, 'graph_scatter_global_2', {w: 800, h: 600, maxLabelWidth: 250});
+        d3.jsonldvis(data, 'graph_scatter_global_2', { w: 800, h: 600, maxLabelWidth: 250 });
     });
-
-});
-
+}
