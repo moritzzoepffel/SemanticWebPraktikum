@@ -1,5 +1,273 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+
+},{}],2:[function(require,module,exports){
+// shim for using process in browser
+var process = module.exports = {};
+
+// cached from whatever global is present so that test runners that stub it
+// don't break things.  But we need to wrap it in a try catch in case it is
+// wrapped in strict mode code which doesn't define any globals.  It's inside a
+// function because try/catches deoptimize in certain engines.
+
+var cachedSetTimeout;
+var cachedClearTimeout;
+
+function defaultSetTimout() {
+    throw new Error('setTimeout has not been defined');
+}
+function defaultClearTimeout () {
+    throw new Error('clearTimeout has not been defined');
+}
+(function () {
+    try {
+        if (typeof setTimeout === 'function') {
+            cachedSetTimeout = setTimeout;
+        } else {
+            cachedSetTimeout = defaultSetTimout;
+        }
+    } catch (e) {
+        cachedSetTimeout = defaultSetTimout;
+    }
+    try {
+        if (typeof clearTimeout === 'function') {
+            cachedClearTimeout = clearTimeout;
+        } else {
+            cachedClearTimeout = defaultClearTimeout;
+        }
+    } catch (e) {
+        cachedClearTimeout = defaultClearTimeout;
+    }
+} ())
+function runTimeout(fun) {
+    if (cachedSetTimeout === setTimeout) {
+        //normal enviroments in sane situations
+        return setTimeout(fun, 0);
+    }
+    // if setTimeout wasn't available but was latter defined
+    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+        cachedSetTimeout = setTimeout;
+        return setTimeout(fun, 0);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedSetTimeout(fun, 0);
+    } catch(e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+            return cachedSetTimeout.call(null, fun, 0);
+        } catch(e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+            return cachedSetTimeout.call(this, fun, 0);
+        }
+    }
+
+
+}
+function runClearTimeout(marker) {
+    if (cachedClearTimeout === clearTimeout) {
+        //normal enviroments in sane situations
+        return clearTimeout(marker);
+    }
+    // if clearTimeout wasn't available but was latter defined
+    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+        cachedClearTimeout = clearTimeout;
+        return clearTimeout(marker);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedClearTimeout(marker);
+    } catch (e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+            return cachedClearTimeout.call(null, marker);
+        } catch (e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+            return cachedClearTimeout.call(this, marker);
+        }
+    }
+
+
+
+}
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
+
+function cleanUpNextTick() {
+    if (!draining || !currentQueue) {
+        return;
+    }
+    draining = false;
+    if (currentQueue.length) {
+        queue = currentQueue.concat(queue);
+    } else {
+        queueIndex = -1;
+    }
+    if (queue.length) {
+        drainQueue();
+    }
+}
+
+function drainQueue() {
+    if (draining) {
+        return;
+    }
+    var timeout = runTimeout(cleanUpNextTick);
+    draining = true;
+
+    var len = queue.length;
+    while(len) {
+        currentQueue = queue;
+        queue = [];
+        while (++queueIndex < len) {
+            if (currentQueue) {
+                currentQueue[queueIndex].run();
+            }
+        }
+        queueIndex = -1;
+        len = queue.length;
+    }
+    currentQueue = null;
+    draining = false;
+    runClearTimeout(timeout);
+}
+
+process.nextTick = function (fun) {
+    var args = new Array(arguments.length - 1);
+    if (arguments.length > 1) {
+        for (var i = 1; i < arguments.length; i++) {
+            args[i - 1] = arguments[i];
+        }
+    }
+    queue.push(new Item(fun, args));
+    if (queue.length === 1 && !draining) {
+        runTimeout(drainQueue);
+    }
+};
+
+// v8 likes predictible objects
+function Item(fun, array) {
+    this.fun = fun;
+    this.array = array;
+}
+Item.prototype.run = function () {
+    this.fun.apply(null, this.array);
+};
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+process.versions = {};
+
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+process.prependListener = noop;
+process.prependOnceListener = noop;
+
+process.listeners = function (name) { return [] }
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+};
+
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+process.umask = function() { return 0; };
+
+},{}],3:[function(require,module,exports){
+(function (setImmediate,clearImmediate){(function (){
+var nextTick = require('process/browser.js').nextTick;
+var apply = Function.prototype.apply;
+var slice = Array.prototype.slice;
+var immediateIds = {};
+var nextImmediateId = 0;
+
+// DOM APIs, for completeness
+
+exports.setTimeout = function() {
+  return new Timeout(apply.call(setTimeout, window, arguments), clearTimeout);
+};
+exports.setInterval = function() {
+  return new Timeout(apply.call(setInterval, window, arguments), clearInterval);
+};
+exports.clearTimeout =
+exports.clearInterval = function(timeout) { timeout.close(); };
+
+function Timeout(id, clearFn) {
+  this._id = id;
+  this._clearFn = clearFn;
+}
+Timeout.prototype.unref = Timeout.prototype.ref = function() {};
+Timeout.prototype.close = function() {
+  this._clearFn.call(window, this._id);
+};
+
+// Does not start the time, just sets up the members needed.
+exports.enroll = function(item, msecs) {
+  clearTimeout(item._idleTimeoutId);
+  item._idleTimeout = msecs;
+};
+
+exports.unenroll = function(item) {
+  clearTimeout(item._idleTimeoutId);
+  item._idleTimeout = -1;
+};
+
+exports._unrefActive = exports.active = function(item) {
+  clearTimeout(item._idleTimeoutId);
+
+  var msecs = item._idleTimeout;
+  if (msecs >= 0) {
+    item._idleTimeoutId = setTimeout(function onTimeout() {
+      if (item._onTimeout)
+        item._onTimeout();
+    }, msecs);
+  }
+};
+
+// That's not how node.js implements it but the exposed api is the same.
+exports.setImmediate = typeof setImmediate === "function" ? setImmediate : function(fn) {
+  var id = nextImmediateId++;
+  var args = arguments.length < 2 ? false : slice.call(arguments, 1);
+
+  immediateIds[id] = true;
+
+  nextTick(function onNextTick() {
+    if (immediateIds[id]) {
+      // fn.call() is faster so we optimize for the common use-case
+      // @see http://jsperf.com/call-apply-segu
+      if (args) {
+        fn.apply(null, args);
+      } else {
+        fn.call(null);
+      }
+      // Prevent ids from leaking
+      exports.clearImmediate(id);
+    }
+  });
+
+  return id;
+};
+
+exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate : function(id) {
+  delete immediateIds[id];
+};
+}).call(this)}).call(this,require("timers").setImmediate,require("timers").clearImmediate)
+},{"process/browser.js":2,"timers":3}],4:[function(require,module,exports){
 const jsonld = require('jsonld');
+const { getInitialContext } = require('jsonld/lib/context');
 
 //TODO https://github.com/digitalbazaar/jsonld.js Dropdown with different view options
 //TODO Build SVG in external python file/javascript
@@ -8,9 +276,22 @@ const jsonld = require('jsonld');
 //TODO https://www.easyrdf.org/docs/rdf-formats-json
 //TODO https://www.ldf.fi/service/rdf-grapher
 //TODO https://json-ld.org/playground/
+//TODO https://github.com/alangrafu/visualRDF
 
 
 document.getElementById('btn1').addEventListener("click", async function () {
+    console.log("Button was pressed.");
+    getMovie();
+});
+
+
+document.getElementById('form1').onsubmit = function(e){
+    e.preventDefault();
+    getMovie();
+}
+
+
+async function getMovie() {
     const filmTitle = document.getElementById('filmName').value;
     if (filmTitle == "") {
         document.getElementById('n-quads_container').innerHTML = "Please type in a Movie Name";
@@ -31,19 +312,24 @@ document.getElementById('btn1').addEventListener("click", async function () {
     let res = JSON.stringify(response).toString();
     console.log(res)
     console.log(response);
-    const quads = await jsonld.toRDF(response, {format: 'application/n-quads'});
-    document.getElementById('n-quads_container').innerHTML = "<xmp>" + quads + "</xmp>"; //TODO Check ob automatischer Zeilenumbruch verfügbar
+    quads = await jsonld.toRDF(response, { format: 'application/n-quads' });
+    quads = format_quads(quads, filmTitle);
+    document.getElementById('n-quads_container').innerHTML = "<p style=\"white-space: pre-wrap\">" + quads + "</p>"; //TODO Check ob automatischer Zeilenumbruch verfügbar
     d3.json(res, (err, data) => {
         if (err) return console.warn(err);
-        d3.jsonldvis(data, 'graph_scatter_global_2', {w: 800, h: 600, maxLabelWidth: 250});
+        d3.jsonldvis(data, 'graph_scatter_global_2', { w: 800, h: 600, maxLabelWidth: 250 });
     });
+}
 
-});
 
 
-},{"jsonld":19}],2:[function(require,module,exports){
-
-},{}],3:[function(require,module,exports){
+function format_quads(text, filmTitle){
+    text = text.replace(/_:b0/gi, '&lt;' + filmTitle + '&gt;');   
+    text = text.replace(/</gi,'&lt;');
+    text = text.replace(/>/gi,'&gt;');
+    return text;
+}
+},{"jsonld":21,"jsonld/lib/context":14}],5:[function(require,module,exports){
 /* jshint esversion: 6 */
 /* jslint node: true */
 'use strict';
@@ -71,7 +357,7 @@ module.exports = function serialize (object) {
   }, '') + '}';
 };
 
-},{}],4:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 /*
  * Copyright (c) 2019 Digital Bazaar, Inc. All rights reserved.
  */
@@ -334,7 +620,7 @@ function _resolveContextUrls({context, base}) {
   }
 }
 
-},{"./JsonLdError":5,"./ResolvedContext":9,"./types":23,"./url":24,"./util":25}],5:[function(require,module,exports){
+},{"./JsonLdError":7,"./ResolvedContext":11,"./types":25,"./url":26,"./util":27}],7:[function(require,module,exports){
 /*
  * Copyright (c) 2017 Digital Bazaar, Inc. All rights reserved.
  */
@@ -359,7 +645,7 @@ module.exports = class JsonLdError extends Error {
   }
 };
 
-},{}],6:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 /*
  * Copyright (c) 2017 Digital Bazaar, Inc. All rights reserved.
  */
@@ -413,7 +699,7 @@ module.exports = jsonld => {
   return JsonLdProcessor;
 };
 
-},{}],7:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 /*
  * Copyright (c) 2017 Digital Bazaar, Inc. All rights reserved.
  */
@@ -422,7 +708,7 @@ module.exports = jsonld => {
 // TODO: move `NQuads` to its own package
 module.exports = require('rdf-canonize').NQuads;
 
-},{"rdf-canonize":28}],8:[function(require,module,exports){
+},{"rdf-canonize":29}],10:[function(require,module,exports){
 /*
  * Copyright (c) 2017-2019 Digital Bazaar, Inc. All rights reserved.
  */
@@ -462,7 +748,7 @@ module.exports = class RequestQueue {
   }
 };
 
-},{}],9:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 /*
  * Copyright (c) 2019 Digital Bazaar, Inc. All rights reserved.
  */
@@ -494,7 +780,7 @@ module.exports = class ResolvedContext {
   }
 };
 
-},{"lru-cache":26}],10:[function(require,module,exports){
+},{"lru-cache":28}],12:[function(require,module,exports){
 /*
  * Copyright (c) 2017 Digital Bazaar, Inc. All rights reserved.
  */
@@ -1674,7 +1960,7 @@ function _checkNestProperty(activeCtx, nestProperty, options) {
   }
 }
 
-},{"./JsonLdError":5,"./context":12,"./graphTypes":18,"./types":23,"./url":24,"./util":25}],11:[function(require,module,exports){
+},{"./JsonLdError":7,"./context":14,"./graphTypes":20,"./types":25,"./url":26,"./util":27}],13:[function(require,module,exports){
 /*
  * Copyright (c) 2017 Digital Bazaar, Inc. All rights reserved.
  */
@@ -1708,7 +1994,7 @@ module.exports = {
   XSD_STRING: XSD + 'string',
 };
 
-},{}],12:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 /*
  * Copyright (c) 2017-2019 Digital Bazaar, Inc. All rights reserved.
  */
@@ -3180,7 +3466,7 @@ function _deepCompare(x1, x2) {
   return true;
 }
 
-},{"./JsonLdError":5,"./types":23,"./url":24,"./util":25}],13:[function(require,module,exports){
+},{"./JsonLdError":7,"./types":25,"./url":26,"./util":27}],15:[function(require,module,exports){
 /*
  * Copyright (c) 2017 Digital Bazaar, Inc. All rights reserved.
  */
@@ -3299,7 +3585,7 @@ function _get(xhr, url, headers) {
   });
 }
 
-},{"../JsonLdError":5,"../RequestQueue":8,"../constants":11,"../url":24,"../util":25}],14:[function(require,module,exports){
+},{"../JsonLdError":7,"../RequestQueue":10,"../constants":13,"../url":26,"../util":27}],16:[function(require,module,exports){
 /*
  * Copyright (c) 2017 Digital Bazaar, Inc. All rights reserved.
  */
@@ -4416,7 +4702,7 @@ async function _expandIndexMap(
   return rval;
 }
 
-},{"./JsonLdError":5,"./context":12,"./graphTypes":18,"./types":23,"./url":24,"./util":25}],15:[function(require,module,exports){
+},{"./JsonLdError":7,"./context":14,"./graphTypes":20,"./types":25,"./url":26,"./util":27}],17:[function(require,module,exports){
 /*
  * Copyright (c) 2017 Digital Bazaar, Inc. All rights reserved.
  */
@@ -4456,7 +4742,7 @@ api.flatten = input => {
   return flattened;
 };
 
-},{"./graphTypes":18,"./nodeMap":20}],16:[function(require,module,exports){
+},{"./graphTypes":20,"./nodeMap":22}],18:[function(require,module,exports){
 /*
  * Copyright (c) 2017 Digital Bazaar, Inc. All rights reserved.
  */
@@ -5283,7 +5569,7 @@ function _valueMatch(pattern, value) {
   return true;
 }
 
-},{"./JsonLdError":5,"./context":12,"./graphTypes":18,"./nodeMap":20,"./types":23,"./url":24,"./util":25}],17:[function(require,module,exports){
+},{"./JsonLdError":7,"./context":14,"./graphTypes":20,"./nodeMap":22,"./types":25,"./url":26,"./util":27}],19:[function(require,module,exports){
 /*
  * Copyright (c) 2017 Digital Bazaar, Inc. All rights reserved.
  */
@@ -5632,7 +5918,7 @@ function _RDFToObject(o, useNativeTypes, rdfDirection) {
   return rval;
 }
 
-},{"./JsonLdError":5,"./constants":11,"./graphTypes":18,"./types":23,"./util":25}],18:[function(require,module,exports){
+},{"./JsonLdError":7,"./constants":13,"./graphTypes":20,"./types":25,"./util":27}],20:[function(require,module,exports){
 /*
  * Copyright (c) 2017 Digital Bazaar, Inc. All rights reserved.
  */
@@ -5753,7 +6039,7 @@ api.isBlankNode = v => {
   return false;
 };
 
-},{"./types":23}],19:[function(require,module,exports){
+},{"./types":25}],21:[function(require,module,exports){
 /**
  * A JavaScript implementation of the JSON-LD API.
  *
@@ -6782,7 +7068,7 @@ wrapper(factory);
 // export API
 module.exports = factory;
 
-},{"./ContextResolver":4,"./JsonLdError":5,"./JsonLdProcessor":6,"./NQuads":7,"./RequestQueue":8,"./compact":10,"./context":12,"./expand":14,"./flatten":15,"./frame":16,"./fromRdf":17,"./graphTypes":18,"./nodeMap":20,"./platform":21,"./toRdf":22,"./types":23,"./url":24,"./util":25,"lru-cache":26,"rdf-canonize":28}],20:[function(require,module,exports){
+},{"./ContextResolver":6,"./JsonLdError":7,"./JsonLdProcessor":8,"./NQuads":9,"./RequestQueue":10,"./compact":12,"./context":14,"./expand":16,"./flatten":17,"./frame":18,"./fromRdf":19,"./graphTypes":20,"./nodeMap":22,"./platform":23,"./toRdf":24,"./types":25,"./url":26,"./util":27,"lru-cache":28,"rdf-canonize":29}],22:[function(require,module,exports){
 /*
  * Copyright (c) 2017 Digital Bazaar, Inc. All rights reserved.
  */
@@ -7074,7 +7360,7 @@ api.mergeNodeMaps = graphs => {
   return defaultGraph;
 };
 
-},{"./JsonLdError":5,"./context":12,"./graphTypes":18,"./types":23,"./util":25}],21:[function(require,module,exports){
+},{"./JsonLdError":7,"./context":14,"./graphTypes":20,"./types":25,"./util":27}],23:[function(require,module,exports){
 /*
  * Copyright (c) 2021 Digital Bazaar, Inc. All rights reserved.
  */
@@ -7115,7 +7401,7 @@ api.setupGlobals = function(jsonld) {
   }
 };
 
-},{"./documentLoaders/xhr":13}],22:[function(require,module,exports){
+},{"./documentLoaders/xhr":15}],24:[function(require,module,exports){
 /*
  * Copyright (c) 2017 Digital Bazaar, Inc. All rights reserved.
  */
@@ -7397,7 +7683,7 @@ function _objectToRDF(item, issuer, dataset, graphTerm, rdfDirection) {
   return object;
 }
 
-},{"./constants":11,"./context":12,"./graphTypes":18,"./nodeMap":20,"./types":23,"./url":24,"./util":25,"canonicalize":3}],23:[function(require,module,exports){
+},{"./constants":13,"./context":14,"./graphTypes":20,"./nodeMap":22,"./types":25,"./url":26,"./util":27,"canonicalize":5}],25:[function(require,module,exports){
 /*
  * Copyright (c) 2017 Digital Bazaar, Inc. All rights reserved.
  */
@@ -7491,7 +7777,7 @@ api.isString = v => (typeof v === 'string' ||
  */
 api.isUndefined = v => typeof v === 'undefined';
 
-},{}],24:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 /*
  * Copyright (c) 2017 Digital Bazaar, Inc. All rights reserved.
  */
@@ -7794,7 +8080,7 @@ api.isAbsolute = v => types.isString(v) && isAbsoluteRegex.test(v);
  */
 api.isRelative = v => types.isString(v);
 
-},{"./types":23}],25:[function(require,module,exports){
+},{"./types":25}],27:[function(require,module,exports){
 /*
  * Copyright (c) 2017-2019 Digital Bazaar, Inc. All rights reserved.
  */
@@ -8247,7 +8533,7 @@ function _labelBlankNodes(issuer, element) {
   return element;
 }
 
-},{"./JsonLdError":5,"./graphTypes":18,"./types":23,"rdf-canonize":28}],26:[function(require,module,exports){
+},{"./JsonLdError":7,"./graphTypes":20,"./types":25,"rdf-canonize":29}],28:[function(require,module,exports){
 'use strict'
 
 // A linked list to keep track of recently-used-ness
@@ -8583,193 +8869,7 @@ const forEachStep = (self, fn, node, thisp) => {
 
 module.exports = LRUCache
 
-},{"yallist":41}],27:[function(require,module,exports){
-// shim for using process in browser
-var process = module.exports = {};
-
-// cached from whatever global is present so that test runners that stub it
-// don't break things.  But we need to wrap it in a try catch in case it is
-// wrapped in strict mode code which doesn't define any globals.  It's inside a
-// function because try/catches deoptimize in certain engines.
-
-var cachedSetTimeout;
-var cachedClearTimeout;
-
-function defaultSetTimout() {
-    throw new Error('setTimeout has not been defined');
-}
-function defaultClearTimeout () {
-    throw new Error('clearTimeout has not been defined');
-}
-(function () {
-    try {
-        if (typeof setTimeout === 'function') {
-            cachedSetTimeout = setTimeout;
-        } else {
-            cachedSetTimeout = defaultSetTimout;
-        }
-    } catch (e) {
-        cachedSetTimeout = defaultSetTimout;
-    }
-    try {
-        if (typeof clearTimeout === 'function') {
-            cachedClearTimeout = clearTimeout;
-        } else {
-            cachedClearTimeout = defaultClearTimeout;
-        }
-    } catch (e) {
-        cachedClearTimeout = defaultClearTimeout;
-    }
-} ())
-function runTimeout(fun) {
-    if (cachedSetTimeout === setTimeout) {
-        //normal enviroments in sane situations
-        return setTimeout(fun, 0);
-    }
-    // if setTimeout wasn't available but was latter defined
-    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
-        cachedSetTimeout = setTimeout;
-        return setTimeout(fun, 0);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedSetTimeout(fun, 0);
-    } catch(e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
-            return cachedSetTimeout.call(null, fun, 0);
-        } catch(e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
-            return cachedSetTimeout.call(this, fun, 0);
-        }
-    }
-
-
-}
-function runClearTimeout(marker) {
-    if (cachedClearTimeout === clearTimeout) {
-        //normal enviroments in sane situations
-        return clearTimeout(marker);
-    }
-    // if clearTimeout wasn't available but was latter defined
-    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
-        cachedClearTimeout = clearTimeout;
-        return clearTimeout(marker);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedClearTimeout(marker);
-    } catch (e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
-            return cachedClearTimeout.call(null, marker);
-        } catch (e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
-            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
-            return cachedClearTimeout.call(this, marker);
-        }
-    }
-
-
-
-}
-var queue = [];
-var draining = false;
-var currentQueue;
-var queueIndex = -1;
-
-function cleanUpNextTick() {
-    if (!draining || !currentQueue) {
-        return;
-    }
-    draining = false;
-    if (currentQueue.length) {
-        queue = currentQueue.concat(queue);
-    } else {
-        queueIndex = -1;
-    }
-    if (queue.length) {
-        drainQueue();
-    }
-}
-
-function drainQueue() {
-    if (draining) {
-        return;
-    }
-    var timeout = runTimeout(cleanUpNextTick);
-    draining = true;
-
-    var len = queue.length;
-    while(len) {
-        currentQueue = queue;
-        queue = [];
-        while (++queueIndex < len) {
-            if (currentQueue) {
-                currentQueue[queueIndex].run();
-            }
-        }
-        queueIndex = -1;
-        len = queue.length;
-    }
-    currentQueue = null;
-    draining = false;
-    runClearTimeout(timeout);
-}
-
-process.nextTick = function (fun) {
-    var args = new Array(arguments.length - 1);
-    if (arguments.length > 1) {
-        for (var i = 1; i < arguments.length; i++) {
-            args[i - 1] = arguments[i];
-        }
-    }
-    queue.push(new Item(fun, args));
-    if (queue.length === 1 && !draining) {
-        runTimeout(drainQueue);
-    }
-};
-
-// v8 likes predictible objects
-function Item(fun, array) {
-    this.fun = fun;
-    this.array = array;
-}
-Item.prototype.run = function () {
-    this.fun.apply(null, this.array);
-};
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-process.version = ''; // empty string to avoid regexp issues
-process.versions = {};
-
-function noop() {}
-
-process.on = noop;
-process.addListener = noop;
-process.once = noop;
-process.off = noop;
-process.removeListener = noop;
-process.removeAllListeners = noop;
-process.emit = noop;
-process.prependListener = noop;
-process.prependOnceListener = noop;
-
-process.listeners = function (name) { return [] }
-
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
-};
-
-process.cwd = function () { return '/' };
-process.chdir = function (dir) {
-    throw new Error('process.chdir is not supported');
-};
-process.umask = function() { return 0; };
-
-},{}],28:[function(require,module,exports){
+},{"yallist":41}],29:[function(require,module,exports){
 /**
  * An implementation of the RDF Dataset Normalization specification.
  *
@@ -8779,7 +8879,7 @@ process.umask = function() { return 0; };
  */
 module.exports = require('./lib');
 
-},{"./lib":37}],29:[function(require,module,exports){
+},{"./lib":38}],30:[function(require,module,exports){
 /*
  * Copyright (c) 2016-2021 Digital Bazaar, Inc. All rights reserved.
  */
@@ -8861,7 +8961,7 @@ module.exports = class IdentifierIssuer {
   }
 };
 
-},{}],30:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 /*
  * Copyright (c) 2016-2021 Digital Bazaar, Inc. All rights reserved.
  */
@@ -8912,7 +9012,7 @@ module.exports = class MessageDigest {
   }
 };
 
-},{"setimmediate":38}],31:[function(require,module,exports){
+},{"setimmediate":39}],32:[function(require,module,exports){
 /*
  * Copyright (c) 2016-2021 Digital Bazaar, Inc. All rights reserved.
  */
@@ -9307,7 +9407,7 @@ function _unescape(s) {
   });
 }
 
-},{}],32:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 /*
  * Copyright (c) 2016-2021 Digital Bazaar, Inc. All rights reserved.
  */
@@ -9394,7 +9494,7 @@ module.exports = class Permuter {
   }
 };
 
-},{}],33:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 (function (setImmediate){(function (){
 /*
  * Copyright (c) 2016-2021 Digital Bazaar, Inc. All rights reserved.
@@ -9908,7 +10008,7 @@ function _stringHashCompare(a, b) {
 }
 
 }).call(this)}).call(this,require("timers").setImmediate)
-},{"./IdentifierIssuer":29,"./MessageDigest":30,"./NQuads":31,"./Permuter":32,"timers":39}],34:[function(require,module,exports){
+},{"./IdentifierIssuer":30,"./MessageDigest":31,"./NQuads":32,"./Permuter":33,"timers":3}],35:[function(require,module,exports){
 /*
  * Copyright (c) 2016-2021 Digital Bazaar, Inc. All rights reserved.
  */
@@ -10398,7 +10498,7 @@ function _stringHashCompare(a, b) {
   return a.hash < b.hash ? -1 : a.hash > b.hash ? 1 : 0;
 }
 
-},{"./IdentifierIssuer":29,"./MessageDigest":30,"./NQuads":31,"./Permuter":32}],35:[function(require,module,exports){
+},{"./IdentifierIssuer":30,"./MessageDigest":31,"./NQuads":32,"./Permuter":33}],36:[function(require,module,exports){
 /*
  * Copyright (c) 2016-2021 Digital Bazaar, Inc. All rights reserved.
  */
@@ -10490,7 +10590,7 @@ module.exports = class URDNA2012 extends URDNA2015 {
   }
 };
 
-},{"./URDNA2015":33}],36:[function(require,module,exports){
+},{"./URDNA2015":34}],37:[function(require,module,exports){
 /*
  * Copyright (c) 2016-2021 Digital Bazaar, Inc. All rights reserved.
  */
@@ -10576,7 +10676,7 @@ module.exports = class URDNA2012Sync extends URDNA2015Sync {
   }
 };
 
-},{"./URDNA2015Sync":34}],37:[function(require,module,exports){
+},{"./URDNA2015Sync":35}],38:[function(require,module,exports){
 /**
  * An implementation of the RDF Dataset Normalization specification.
  * This library works in the browser and node.js.
@@ -10723,7 +10823,7 @@ api._canonizeSync = function(dataset, options) {
     'Invalid RDF Dataset Canonicalization algorithm: ' + options.algorithm);
 };
 
-},{"./IdentifierIssuer":29,"./NQuads":31,"./URDNA2015":33,"./URDNA2015Sync":34,"./URGNA2012":35,"./URGNA2012Sync":36,"rdf-canonize-native":2}],38:[function(require,module,exports){
+},{"./IdentifierIssuer":30,"./NQuads":32,"./URDNA2015":34,"./URDNA2015Sync":35,"./URGNA2012":36,"./URGNA2012Sync":37,"rdf-canonize-native":1}],39:[function(require,module,exports){
 (function (process,global){(function (){
 (function (global, undefined) {
     "use strict";
@@ -10913,86 +11013,7 @@ api._canonizeSync = function(dataset, options) {
 }(typeof self === "undefined" ? typeof global === "undefined" ? this : global : self));
 
 }).call(this)}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":27}],39:[function(require,module,exports){
-(function (setImmediate,clearImmediate){(function (){
-var nextTick = require('process/browser.js').nextTick;
-var apply = Function.prototype.apply;
-var slice = Array.prototype.slice;
-var immediateIds = {};
-var nextImmediateId = 0;
-
-// DOM APIs, for completeness
-
-exports.setTimeout = function() {
-  return new Timeout(apply.call(setTimeout, window, arguments), clearTimeout);
-};
-exports.setInterval = function() {
-  return new Timeout(apply.call(setInterval, window, arguments), clearInterval);
-};
-exports.clearTimeout =
-exports.clearInterval = function(timeout) { timeout.close(); };
-
-function Timeout(id, clearFn) {
-  this._id = id;
-  this._clearFn = clearFn;
-}
-Timeout.prototype.unref = Timeout.prototype.ref = function() {};
-Timeout.prototype.close = function() {
-  this._clearFn.call(window, this._id);
-};
-
-// Does not start the time, just sets up the members needed.
-exports.enroll = function(item, msecs) {
-  clearTimeout(item._idleTimeoutId);
-  item._idleTimeout = msecs;
-};
-
-exports.unenroll = function(item) {
-  clearTimeout(item._idleTimeoutId);
-  item._idleTimeout = -1;
-};
-
-exports._unrefActive = exports.active = function(item) {
-  clearTimeout(item._idleTimeoutId);
-
-  var msecs = item._idleTimeout;
-  if (msecs >= 0) {
-    item._idleTimeoutId = setTimeout(function onTimeout() {
-      if (item._onTimeout)
-        item._onTimeout();
-    }, msecs);
-  }
-};
-
-// That's not how node.js implements it but the exposed api is the same.
-exports.setImmediate = typeof setImmediate === "function" ? setImmediate : function(fn) {
-  var id = nextImmediateId++;
-  var args = arguments.length < 2 ? false : slice.call(arguments, 1);
-
-  immediateIds[id] = true;
-
-  nextTick(function onNextTick() {
-    if (immediateIds[id]) {
-      // fn.call() is faster so we optimize for the common use-case
-      // @see http://jsperf.com/call-apply-segu
-      if (args) {
-        fn.apply(null, args);
-      } else {
-        fn.call(null);
-      }
-      // Prevent ids from leaking
-      exports.clearImmediate(id);
-    }
-  });
-
-  return id;
-};
-
-exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate : function(id) {
-  delete immediateIds[id];
-};
-}).call(this)}).call(this,require("timers").setImmediate,require("timers").clearImmediate)
-},{"process/browser.js":27,"timers":39}],40:[function(require,module,exports){
+},{"_process":2}],40:[function(require,module,exports){
 'use strict'
 module.exports = function (Yallist) {
   Yallist.prototype[Symbol.iterator] = function* () {
@@ -11430,4 +11451,4 @@ try {
   require('./iterator.js')(Yallist)
 } catch (er) {}
 
-},{"./iterator.js":40}]},{},[1]);
+},{"./iterator.js":40}]},{},[4]);
