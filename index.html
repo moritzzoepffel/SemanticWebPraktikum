@@ -23,6 +23,64 @@
     <link rel="stylesheet" href="./style/shreerang-material.css">
 
 
+    <style>
+        body {
+            background-image: url("../Searchs_004.png");
+            background-color: #cccccc;
+            background-size: cover;
+        }
+
+        .card {
+            background-color: rgba(255, 255, 255, .5);
+            border-radius: 02rem;
+        }
+
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+            border-radius: 02rem 02rem 0px 0px;
+        }
+
+        /* Style the buttons inside the tab */
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+            font-size: 17px;
+        }
+
+        /* Change background color of buttons on hover */
+        .tab button:hover {
+            background-color: #ddd;
+        }
+
+        /* Create an active/current tablink class */
+        .tab button.active {
+            background-color: #ccc;
+        }
+
+        /* Style the tab content */
+        .tabcontent {
+            display: none;
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-top: none;
+            background-color: rgba(255, 255, 255, .5);
+            border-radius: 0px 0px 02rem 02rem;
+        }
+
+        .navbar.bg-dark {
+            background-color: rgba(0, 0, 0, 0.6) !important;
+        }
+    </style>
+    <script src="bundle.js"></script>
+
+</head>
 <body>
 <!-- Das hier ist die gesamte leere Struktur, welches das Gerüst für die Webseite baut. Diese Div Container sind zunächst leer und werden erst später durch d3 gefüllt -->
 <div class="layout-wrapper layout-1 layout-without-sidenav">
@@ -30,9 +88,11 @@
         <nav class="layout-navbar navbar navbar-expand-lg align-items-lg-center bg-dark" id="layout-navbar">
             <div class="f-container">
                 <a href="" class="navbar-brand app-brand demo d-lg-none py-2 mr-4">
-                        <span class="app-brand-logo">
-                            <img src="./index.png" alt="Logo" width="100" height="100"
-                                 style="max-width:100%;height:auto;">
+                        <span class="app-brand-logo" style=" width: 80px; height: 80px;">
+                            <svg style=" width: 100%; height: auto;" id="Capa_1"
+                                 enable-background="new 0 0 512.038 512.038" height="512" viewBox="0 0 512.038 512.038"
+                                 width="512" xmlns="http://www.w3.org/2000/svg"><g><path
+                                    d="m429.498 512.019h-397.023c-4.143 0-7.5-3.357-7.5-7.5v-60c0-4.143 3.357-7.5 7.5-7.5h30c4.143 0 7.5 3.357 7.5 7.5s-3.357 7.5-7.5 7.5h-22.5v45h45v-52.5c0-4.143 3.357-7.5 7.5-7.5h26.396c-30.515-17.183-56.811-41.054-77.121-70.222-27.313-39.224-41.75-85.31-41.75-133.278 0-128.752 104.748-233.5 233.5-233.5 44.523 0 87.821 12.578 125.211 36.376 3.494 2.224 4.523 6.859 2.3 10.354-2.225 3.493-6.859 4.524-10.354 2.3-34.979-22.263-75.49-34.03-117.156-34.03-120.481 0-218.5 98.019-218.5 218.5 0 90.625 54.456 170.447 138.772 203.5h159.454c83.065-32.573 138.773-114.173 138.773-203.5 0-64.673-28.42-125.659-77.972-167.321-3.171-2.665-3.58-7.396-.914-10.566 2.666-3.171 7.396-3.581 10.566-.914 52.952 44.518 83.32 109.688 83.32 178.801 0 48.132-14.527 94.35-42.013 133.656-.147.211-.295.421-.443.632l23.058 23.98 32.355-31.253-17.828-18.713c-2.857-2.999-2.742-7.747.256-10.604 3.001-2.857 7.747-2.742 10.604.256l22.966 24.105c16.113 16.68 20.504 40.356 11.424 61.752-.081.189-25.539 60.152-25.573 60.227-9.127 21.264-29.148 34.462-52.308 34.462zm-29.523-15h29.523c5.458 0 10.679-.995 15.477-2.861v-42.139h-45zm-60 0h45v-45h-45zm-60 0h45v-45h-45zm-60 0h45v-45h-45zm-60 0h45v-45h-45zm-60 0h45v-45h-45zm360-45.207v32.2c3.34-3.565 6.099-7.78 8.118-12.541.03-.069 10.344-24.357 10.344-24.357-5.724 2.546-11.94 4.153-18.462 4.698zm-111.841-14.793h106.842c4.042 0 7.954-.546 11.661-1.587-1.838-3.39-4.174-6.559-6.983-9.469l-44.248-46.019c-18.705 23.253-41.48 42.552-67.272 57.075zm109.864-34.419 12.456 12.955c3.897 4.036 7.127 8.473 9.649 13.248 5.651-4.229 10.234-9.952 13.256-16.843l.208-.49c.025-.062.053-.123.081-.184 5.596-13.353 4.084-27.889-3.77-39.48zm-224.498-146.581c-12.406 0-22.5-10.094-22.5-22.5s10.094-22.5 22.5-22.5 22.5 10.094 22.5 22.5-10.094 22.5-22.5 22.5zm0-30c-4.136 0-7.5 3.364-7.5 7.5s3.364 7.5 7.5 7.5 7.5-3.364 7.5-7.5-3.364-7.5-7.5-7.5zm0-64.645c-25.14 0-49.31-21.208-58.535-30.326-13.526-13.369-29.321-34.769-29.321-51.078 0-28.01 38.591-49.951 87.856-49.951s87.856 21.941 87.856 49.951c0 16.31-15.795 37.709-29.321 51.078-9.225 9.118-33.395 30.326-58.535 30.326zm-69.689-70.253c3.842 8.278 11.144 18.825 21.699 29.259 16.468 16.276 34.408 25.994 47.99 25.994s31.522-9.718 47.99-25.994c10.556-10.434 17.856-20.979 21.699-29.258-21.552-10.551-45.521-16.104-69.689-16.104-24.164.001-48.141 5.554-69.689 16.103zm69.689-31.102c24.951 0 49.715 5.411 72.252 15.723-1.961-6.906-8.621-13.709-18.935-19.157-14.117-7.459-33.052-11.566-53.317-11.566-20.266 0-39.2 4.107-53.317 11.565-10.313 5.447-16.973 12.251-18.935 19.156 22.535-10.309 47.306-15.721 72.252-15.721zm-173.183 209.607c-26.639-8.655-35.581-52.138-20.357-98.992s48.016-76.776 74.655-68.121c15.511 5.04 30.983 26.674 39.518 43.67 5.821 11.592 18.522 41.132 10.754 65.042h-.001c-5.027 15.475-18.541 27.742-28.991 35.308-3.354 2.429-8.044 1.678-10.474-1.677-2.429-3.355-1.678-8.045 1.677-10.474 12.22-8.847 20.573-18.716 23.522-27.792 4.197-12.917.499-32.983-9.892-53.674-6.661-13.263-14.435-23.465-21.12-29.678-16.694 17.237-29.382 38.317-36.85 61.302-7.467 22.981-9.594 47.501-6.221 71.255l.085-.02c6.856-.834 15.727-3.16 25.82-7.498 3.806-1.637 8.216.124 9.852 3.93s-.124 8.216-3.93 9.852c-7.241 3.111-23.049 9.121-37.078 9.121-3.863 0-7.591-.456-10.969-1.554m8.175-89.721c7.71-23.73 20.509-45.61 37.28-63.857-7.174-.269-15.702 3.963-24.071 12.088-11.455 11.122-21.213 27.861-27.475 47.134-6.262 19.274-8.207 38.551-5.476 54.282 1.994 11.491 6.407 19.928 12.368 23.927-2.842-24.618-.335-49.849 7.374-73.574zm122.602 111.98c20.338 14.777 27.427 46.141 29.531 58.94 3.085 18.766 3.285 45.363-6.302 58.558-16.464 22.66-60.581 17.728-100.438-11.229s-58.181-69.392-41.717-92.052c9.587-13.195 34.943-21.223 53.744-24.088 12.824-1.955 44.844-4.906 65.182 9.871zm15.087 97.798c1.758-8.955 2.05-21.78-.357-36.425-3.756-22.847-12.558-41.254-23.546-49.238-10.988-7.983-31.214-10.667-54.104-7.178-14.672 2.236-26.778 6.477-34.752 10.916 11.234 21.204 27.362 39.785 46.915 53.99 19.548 14.203 42.21 23.803 65.844 27.935zm-74.662-15.8c-20.186-14.666-37.04-33.599-49.212-55.189-2.473 6.74-1.083 16.158 4.058 26.628 7.037 14.332 19.942 28.785 36.337 40.696 16.395 11.912 34.128 19.718 49.933 21.983 11.545 1.655 20.932.065 26.578-4.368-24.291-4.905-47.512-15.087-67.694-29.75zm144.386-81.998c20.338-14.777 52.358-11.826 65.181-9.872 18.801 2.865 44.158 10.894 53.744 24.088 16.464 22.66-1.86 63.094-41.717 92.052s-83.974 33.89-100.438 11.229c-9.587-13.195-9.386-39.791-6.302-58.558 2.106-12.798 9.194-44.162 29.532-58.939zm97.674 15.873c-7.974-4.439-20.081-8.68-34.753-10.916-22.89-3.488-43.116-.805-54.104 7.178s-19.79 26.39-23.546 49.238c-2.407 14.645-2.115 27.469-.358 36.425 23.637-4.132 46.293-13.729 65.845-27.934 19.55-14.204 35.683-32.79 46.916-53.991zm-38.098 66.125c-20.186 14.666-43.401 24.844-67.695 29.749 5.646 4.435 15.033 6.023 26.579 4.369 15.805-2.264 33.538-10.071 49.933-21.983s29.299-26.364 36.337-40.696c5.141-10.468 6.53-19.888 4.059-26.627-12.173 21.587-29.031 40.525-49.213 55.188zm-33.367-162.658c-7.769-23.909 4.932-53.45 10.754-65.042 8.535-16.996 24.006-38.63 39.517-43.67 26.639-8.656 59.432 21.266 74.656 68.121s6.282 90.337-20.357 98.992c-15.511 5.04-40.744-3.369-57.639-12.102-11.524-5.957-39.163-22.39-46.931-46.299zm45.279-87.988c-6.686 6.212-14.46 16.415-21.121 29.679-10.391 20.691-14.089 40.757-9.892 53.674s18.983 26.977 39.552 37.609c13.185 6.815 25.471 10.499 34.531 11.596 3.375-23.757 1.248-48.27-6.22-71.255-7.468-22.982-20.159-44.069-36.85-61.303zm51.115 56.667c7.71 23.73 10.216 48.954 7.374 73.574 5.962-3.999 10.374-12.435 12.368-23.928 2.731-15.731.785-35.009-5.477-54.282-6.262-19.274-16.02-36.012-27.475-47.134-8.367-8.124-16.896-12.356-24.07-12.088 16.77 18.247 29.571 40.133 37.28 63.858z"/></g></svg>
                         </span>
                     <span class="app-brand-text font-weight-bold ml-3">RDF Film Database</span>
                 </a>
@@ -50,47 +110,59 @@
                             <h6 class="card-header-title mb-0">Auswahl des Films</h6>
                         </div>
 
-                        <div class="card-body mb-0 text-muted overflow-auto" id="rules"
+                        <div class="card-body mb-0 overflow-auto" id="rules"
                              style="text-align: justify; -ms-overflow-style: none;">
                             <p class="font-weight-bold">
                                 Bitte einen Filmtitel eingeben und anschließend auf Submit klicken!
                             </p>
-                            <form id="form1">
+                            <form>
                                 <label class="label mb-1 font-weight-bold" for="filmName">Filmtitel</label><br>
                                 <input class="col-lg-4" type="text" id="filmName" name="fname"><br><br>
-                                <input type="Button" id="btn1" value="Submit">
+                                <input type="Button" id="btn1" class="btn btn-default" value="Submit">
                             </form>
                         </div>
                     </div>
                 </div>
             </div>
 
+            <div>
+                <div class="tab">
+                    <button class="tablinks active" onclick="openCity(event, 'N-Quads')">N-Quads</button>
+                    <button class="tablinks" onclick="openCity(event, 'Turtle')">Turtle</button>
+                    <button class="tablinks" onclick="openCity(event, 'RDF/XML')">RDF/XML</button>
+                    <button class="tablinks" onclick="openCity(event, 'Visual')">Visualize</button>
+                </div>
 
-            <div class="row">
+                <div id="N-Quads" style="display: block" class="tabcontent">
+                    <p id="n-quads_container"></p>
+                </div>
+
+                <div id="Turtle" class="tabcontent">
+                    <p id="turtle_container"></p>
+                </div>
+
+                <div id="RDF/XML" class="tabcontent">
+                    <p id="rdf_container"></p>
+                </div>
+
+                <div id="Visual" class="tabcontent">
+                    <p id="visual_container"></p>
+                </div>
+            </div>
+
+
+            <!--<div class="row">
                 <div class="col">
                     <div class="card mb-4">
                         <div class="card-header with-elements">
                             <h6 class="card-header-title mb-0">N-Quads</h6>
                         </div>
-                        <!-- 
-                             <div class="card-header">
-                                <ul class="nav nav-tabs card-header-tabs">
-                                <li class="nav-item">
-                                    <a class="nav-link active" href="#">Turtle</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="#">N-Quads</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="#">IDK</a>
-                                </li>
-                                </ul>
-                            </div>
-                        -->
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-lg-12 mb-4">
-                                    <div id="n-quads_container"></div>
+                                    <div>
+                                        <p id="n-quads_container"></p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -98,7 +170,7 @@
                 </div>
             </div>
 
-            <div class="row">
+            <div class="row mt-4">
                 <div class="col">
                     <div class="card mb-4">
                         <div class="card-header with-elements">
@@ -114,6 +186,7 @@
                     </div>
                 </div>
             </div>
+            -->
 
         </div>
         <nav class="layout-footer footer footer-light">
@@ -133,10 +206,25 @@
 
     </div>
 </div>
-
-<!-- Hier binden wir alle notwendigen Script dokumente ein -->
-<script src="bundle.js"></script>
-
-
 </body>
+
+<!-- Hier binden wir alle notwendigen Script-Dokumente ein -->
+<script src="./bundle.js"></script>
+
+<script>
+    function openCity(evt, cityName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        document.getElementById(cityName).style.display = "block";
+        evt.currentTarget.className += " active";
+    }
+</script>
+
 </html>
