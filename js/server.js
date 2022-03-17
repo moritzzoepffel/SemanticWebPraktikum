@@ -155,7 +155,7 @@ async function getGraph() {
 }
 
 async function getGraphRDFGrapher() {
-    const browser = await puppeteer.launch({headless: false});
+    const browser = await puppeteer.launch({headless: true});
     const page = await browser.newPage();
 
     await page.goto('https://www.ldf.fi/service/rdf-grapher');

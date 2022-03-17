@@ -70,7 +70,7 @@ async function getMovie() {
 async function renewElements() {
     document.getElementById('n-quads_container').innerHTML = "<p style=\"white-space: pre-wrap\">" + quads + "</p>";
     document.getElementById('turtle_container').innerHTML = "<p style=\"white-space: pre-wrap\">" + turtle + "</p>";
-    document.getElementById('rdf_container').innerHTML = "<p style=\"white-space: pre-wrap\">" + rdfXml + "</p>";
+    document.getElementById('rdf_container').innerHTML = rdfXml;
     document.getElementById('visual_container').innerHTML = svg;
 }
 
