@@ -47,7 +47,7 @@ server.listen(port, "127.0.0.1", () => {
 async function start(filmTitle) {
     quads = await getQuads(filmTitle);
     await convert(quads, 'rdfxml');
-    await getGraph();
+    await getGraphRDFGrapher();
     console.log("###################    Quads   #########################");
     console.log(quads);
     console.log("###################    XML     #########################");
@@ -132,14 +132,12 @@ async function getGraph() {
 
     await page.goto('https://json-ld.org/playground/');
 
-    var jsonString = JSON.stringify(json)
+    console.log(json)
 
-    console.log(jsonString)
-
-    await page.waitForTimeout(2000)
+    await page.waitForTimeout(1000)
     await page.waitForSelector("#pane-input > div > div:nth-child(1) > textarea");
-    await page.waitForTimeout(2000)
-    await page.type("#pane-input > div > div:nth-child(1) > textarea", jsonString);
+    await page.waitForTimeout(1000)
+    await page.type("#pane-input > div > div:nth-child(1) > textarea", json);
 
     await page.evaluate(() => {
         document.querySelector('#tab-visualized > span').click();
@@ -152,6 +150,38 @@ async function getGraph() {
     svg = await page.$eval('#visualized', el => el.innerHTML);
 
     console.log(svg)
+
+    await browser.close();
+}
+
+async function getGraphRDFGrapher() {
+    const browser = await puppeteer.launch({headless: false});
+    const page = await browser.newPage();
+
+    await page.goto('https://www.ldf.fi/service/rdf-grapher');
+
+    await page.waitForTimeout(1000)
+    await page.waitForSelector("#body > form > textarea");
+    await page.evaluate(() => document.querySelector("#body > form > textarea").innerHTML = "");
+    await page.waitForTimeout(1000)
+    await page.type("#body > form > textarea", turtle);
+
+
+    await page.select("#body > form > select:nth-child(6)", "svg");
+
+    await page.click("#body > form > input[type=\"submit\"]:nth-child(11)")
+
+    //waiting for page to process
+    await page.waitForTimeout(1000);
+
+    svg = await page.evaluate(() => document.querySelector('*').outerHTML);
+
+    //read result
+    // svg = await page.$eval('#visualized', el => el.innerHTML);
+
+    var begin = "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"auto\" height=\"auto\" viewBox=\"0.00 0.00 2410.99 1283.54\">"
+
+    svg = begin + svg.substring(svg.search("\n"));
 
     await browser.close();
 }
