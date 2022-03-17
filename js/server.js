@@ -47,7 +47,7 @@ server.listen(port, "127.0.0.1", () => {
 async function start(filmTitle) {
     quads = await getQuads(filmTitle);
     await convert(quads, 'rdfxml');
-    //await getGraph();
+    await getGraph();
     console.log("###################    Quads   #########################");
     console.log(quads);
     console.log("###################    XML     #########################");
@@ -127,16 +127,18 @@ async function convert(quads, type) {
 }
 
 async function getGraph() {
-    const browser = await puppeteer.launch({headless: true});
+    const browser = await puppeteer.launch({headless: false});
     const page = await browser.newPage();
 
     await page.goto('https://json-ld.org/playground/');
 
     var jsonString = JSON.stringify(json)
 
-    await page.waitForTimeout(1000)
+    console.log(jsonString)
+
+    await page.waitForTimeout(2000)
     await page.waitForSelector("#pane-input > div > div:nth-child(1) > textarea");
-    await page.waitForTimeout(1000)
+    await page.waitForTimeout(2000)
     await page.type("#pane-input > div > div:nth-child(1) > textarea", jsonString);
 
     await page.evaluate(() => {
@@ -144,10 +146,12 @@ async function getGraph() {
     });
 
     //waiting for page to process
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(2000);
 
     //read result
     svg = await page.$eval('#visualized', el => el.innerHTML);
+
+    console.log(svg)
 
     await browser.close();
 }

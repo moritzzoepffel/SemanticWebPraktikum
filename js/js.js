@@ -15,20 +15,12 @@ var svg;
 //TODO https://json-ld.org/playground/
 //TODO https://github.com/alangrafu/visualRDF
 
-/*
-document.getElementById('form1').onsubmit = function (e) {
-    e.preventDefault().then(getMovie());
+
+document.getElementById('form1').onsubmit = async function (e) {
+    e.preventDefault();
+    await getMovie();
 };
 
-
-
-
-document.getElementByClassName('tablinks').addEventListener("click", async function (e) {
-    console.log("Müsste akltualisieren")
-    renewElements();
-});
-
- */
 
 document.getElementById('btn1').addEventListener("click", async function (e) {
     await getMovie();
@@ -53,6 +45,8 @@ async function getMovie() {
 
     quads = await getQuads(filmTitle);
 
+    document.getElementById('n-quads_container').innerHTML = "<p style=\"white-space: pre-wrap\">" + quads + "</p>";
+
     await axios.get('http://127.0.0.1:8080/' + filmTitle)
         .then(res => {
             console.log(`statusCode: ${res.status}`)
@@ -69,12 +63,10 @@ async function getMovie() {
             console.error(error)
         })
 
-    document.getElementById('n-quads_container').innerHTML = "<p style=\"white-space: pre-wrap\">" + quads + "</p>";
-    document.getElementById('graph_scatter_1').innerHTML = svg;
+    // document.getElementById('graph_scatter_1').innerHTML = svg;
 }
 
 async function renewElements() {
-    console.log("WTF");
     document.getElementById('n-quads_container').innerHTML = "<p style=\"white-space: pre-wrap\">" + quads + "</p>";
     document.getElementById('turtle_container').innerHTML = "<p style=\"white-space: pre-wrap\">" + turtle + "</p>";
     document.getElementById('rdf_container').innerHTML = "<p style=\"white-space: pre-wrap\">" + rdfXml + "</p>";
