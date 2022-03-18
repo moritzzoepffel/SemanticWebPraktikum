@@ -75,8 +75,8 @@ async function getMovie() {
         })
         .catch(error => {
             console.error(error)
-        })
-
+        });
+    await renewElements();
     // document.getElementById('graph_scatter_1').innerHTML = svg;
 }
 
@@ -84,7 +84,8 @@ async function renewElements() {
     if (svg != undefined) {
         document.getElementById('n-quads_container').innerHTML = "<p style=\"white-space: pre-wrap\">" + quads + "</p>";
         document.getElementById('turtle_container').innerHTML = "<p style=\"white-space: pre-wrap\">" + turtle + "</p>";
-        document.getElementById('rdf_container').innerHTML = "<textarea cols=\"80\" rows=\"20\" style=\"resize: none; border: none\">" + rdfXml + "</textarea>";
+        //document.getElementById('rdf_container').innerHTML = "<textarea cols=\"80\" rows=\"20\" style=\"resize: none; border: none\">" + rdfXml + "</textarea>";
+        document.getElementById('visual_container').innerText = rdfXml;
         document.getElementById('visual_container').innerHTML = svg;
     }
 }
