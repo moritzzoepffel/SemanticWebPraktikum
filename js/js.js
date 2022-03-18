@@ -35,10 +35,11 @@ for (let i = 0; i < collection.length; i++) {
 }
 
 function showSpinner() {
+    turtle = undefined;
     var spinnerString = "<div class=\"d-flex justify-content-center\">\n" +
         "<div class=\"spinner-border\" role=\"status\" style=\"display: block\">\n" +
         "<span class=\"visually-hidden\"></span>\n" +
-        "</div>"
+        "</div>";
     document.getElementById('n-quads_container').innerHTML = spinnerString;
     document.getElementById('turtle_container').innerHTML = spinnerString;
     document.getElementById('rdf_container').innerHTML = spinnerString;
@@ -117,3 +118,4 @@ function format_quads(text, filmTitle) {
     text = text.replace(/>/gi, '&gt;');
     return text;
 }
+
