@@ -73,11 +73,6 @@ async function getMovie() {
             console.log(rdfXml)
             console.log(turtle)
             console.log(svg)
-            var s = rdfXml.replace("    ", "\t");
-            s = s.replace("        ", "\t\t");
-            console.log(JSON.stringify(s));
-            console.log(s);
-
         })
         .catch(error => {
             console.error(error)
@@ -90,9 +85,9 @@ async function renewElements() {
     if (svg != undefined) {
         document.getElementById('n-quads_container').innerHTML = "<p style=\"white-space: pre-wrap\">" + quads + "</p>";
         document.getElementById('turtle_container').innerHTML = "<p style=\"white-space: pre-wrap\">" + turtle + "</p>";
-        document.getElementById('rdf_container').innerHTML = "<textarea cols=\"80\" rows=\"20\" style=\"resize: none; border: none\">" + rdfXml + "</textarea>";
+        //document.getElementById('rdf_container').innerHTML = "<textarea cols=\"80\" rows=\"20\" style=\"resize: none; border: none\">" + rdfXml + "</textarea>";
         document.getElementById('visual_container').innerText = rdfXml;
-        //document.getElementById('visual_container').innerHTML = svg;
+        document.getElementById('visual_container').innerHTML = svg;
     }
 }
 
