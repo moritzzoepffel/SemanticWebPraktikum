@@ -1,281 +1,11 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-
-},{}],2:[function(require,module,exports){
-// shim for using process in browser
-var process = module.exports = {};
-
-// cached from whatever global is present so that test runners that stub it
-// don't break things.  But we need to wrap it in a try catch in case it is
-// wrapped in strict mode code which doesn't define any globals.  It's inside a
-// function because try/catches deoptimize in certain engines.
-
-var cachedSetTimeout;
-var cachedClearTimeout;
-
-function defaultSetTimout() {
-    throw new Error('setTimeout has not been defined');
-}
-function defaultClearTimeout () {
-    throw new Error('clearTimeout has not been defined');
-}
-(function () {
-    try {
-        if (typeof setTimeout === 'function') {
-            cachedSetTimeout = setTimeout;
-        } else {
-            cachedSetTimeout = defaultSetTimout;
-        }
-    } catch (e) {
-        cachedSetTimeout = defaultSetTimout;
-    }
-    try {
-        if (typeof clearTimeout === 'function') {
-            cachedClearTimeout = clearTimeout;
-        } else {
-            cachedClearTimeout = defaultClearTimeout;
-        }
-    } catch (e) {
-        cachedClearTimeout = defaultClearTimeout;
-    }
-} ())
-function runTimeout(fun) {
-    if (cachedSetTimeout === setTimeout) {
-        //normal enviroments in sane situations
-        return setTimeout(fun, 0);
-    }
-    // if setTimeout wasn't available but was latter defined
-    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
-        cachedSetTimeout = setTimeout;
-        return setTimeout(fun, 0);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedSetTimeout(fun, 0);
-    } catch(e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
-            return cachedSetTimeout.call(null, fun, 0);
-        } catch(e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
-            return cachedSetTimeout.call(this, fun, 0);
-        }
-    }
-
-
-}
-function runClearTimeout(marker) {
-    if (cachedClearTimeout === clearTimeout) {
-        //normal enviroments in sane situations
-        return clearTimeout(marker);
-    }
-    // if clearTimeout wasn't available but was latter defined
-    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
-        cachedClearTimeout = clearTimeout;
-        return clearTimeout(marker);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedClearTimeout(marker);
-    } catch (e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
-            return cachedClearTimeout.call(null, marker);
-        } catch (e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
-            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
-            return cachedClearTimeout.call(this, marker);
-        }
-    }
-
-
-
-}
-var queue = [];
-var draining = false;
-var currentQueue;
-var queueIndex = -1;
-
-function cleanUpNextTick() {
-    if (!draining || !currentQueue) {
-        return;
-    }
-    draining = false;
-    if (currentQueue.length) {
-        queue = currentQueue.concat(queue);
-    } else {
-        queueIndex = -1;
-    }
-    if (queue.length) {
-        drainQueue();
-    }
-}
-
-function drainQueue() {
-    if (draining) {
-        return;
-    }
-    var timeout = runTimeout(cleanUpNextTick);
-    draining = true;
-
-    var len = queue.length;
-    while(len) {
-        currentQueue = queue;
-        queue = [];
-        while (++queueIndex < len) {
-            if (currentQueue) {
-                currentQueue[queueIndex].run();
-            }
-        }
-        queueIndex = -1;
-        len = queue.length;
-    }
-    currentQueue = null;
-    draining = false;
-    runClearTimeout(timeout);
-}
-
-process.nextTick = function (fun) {
-    var args = new Array(arguments.length - 1);
-    if (arguments.length > 1) {
-        for (var i = 1; i < arguments.length; i++) {
-            args[i - 1] = arguments[i];
-        }
-    }
-    queue.push(new Item(fun, args));
-    if (queue.length === 1 && !draining) {
-        runTimeout(drainQueue);
-    }
-};
-
-// v8 likes predictible objects
-function Item(fun, array) {
-    this.fun = fun;
-    this.array = array;
-}
-Item.prototype.run = function () {
-    this.fun.apply(null, this.array);
-};
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-process.version = ''; // empty string to avoid regexp issues
-process.versions = {};
-
-function noop() {}
-
-process.on = noop;
-process.addListener = noop;
-process.once = noop;
-process.off = noop;
-process.removeListener = noop;
-process.removeAllListeners = noop;
-process.emit = noop;
-process.prependListener = noop;
-process.prependOnceListener = noop;
-
-process.listeners = function (name) { return [] }
-
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
-};
-
-process.cwd = function () { return '/' };
-process.chdir = function (dir) {
-    throw new Error('process.chdir is not supported');
-};
-process.umask = function() { return 0; };
-
-},{}],3:[function(require,module,exports){
-(function (setImmediate,clearImmediate){(function (){
-var nextTick = require('process/browser.js').nextTick;
-var apply = Function.prototype.apply;
-var slice = Array.prototype.slice;
-var immediateIds = {};
-var nextImmediateId = 0;
-
-// DOM APIs, for completeness
-
-exports.setTimeout = function() {
-  return new Timeout(apply.call(setTimeout, window, arguments), clearTimeout);
-};
-exports.setInterval = function() {
-  return new Timeout(apply.call(setInterval, window, arguments), clearInterval);
-};
-exports.clearTimeout =
-exports.clearInterval = function(timeout) { timeout.close(); };
-
-function Timeout(id, clearFn) {
-  this._id = id;
-  this._clearFn = clearFn;
-}
-Timeout.prototype.unref = Timeout.prototype.ref = function() {};
-Timeout.prototype.close = function() {
-  this._clearFn.call(window, this._id);
-};
-
-// Does not start the time, just sets up the members needed.
-exports.enroll = function(item, msecs) {
-  clearTimeout(item._idleTimeoutId);
-  item._idleTimeout = msecs;
-};
-
-exports.unenroll = function(item) {
-  clearTimeout(item._idleTimeoutId);
-  item._idleTimeout = -1;
-};
-
-exports._unrefActive = exports.active = function(item) {
-  clearTimeout(item._idleTimeoutId);
-
-  var msecs = item._idleTimeout;
-  if (msecs >= 0) {
-    item._idleTimeoutId = setTimeout(function onTimeout() {
-      if (item._onTimeout)
-        item._onTimeout();
-    }, msecs);
-  }
-};
-
-// That's not how node.js implements it but the exposed api is the same.
-exports.setImmediate = typeof setImmediate === "function" ? setImmediate : function(fn) {
-  var id = nextImmediateId++;
-  var args = arguments.length < 2 ? false : slice.call(arguments, 1);
-
-  immediateIds[id] = true;
-
-  nextTick(function onNextTick() {
-    if (immediateIds[id]) {
-      // fn.call() is faster so we optimize for the common use-case
-      // @see http://jsperf.com/call-apply-segu
-      if (args) {
-        fn.apply(null, args);
-      } else {
-        fn.call(null);
-      }
-      // Prevent ids from leaking
-      exports.clearImmediate(id);
-    }
-  });
-
-  return id;
-};
-
-exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate : function(id) {
-  delete immediateIds[id];
-};
-}).call(this)}).call(this,require("timers").setImmediate,require("timers").clearImmediate)
-},{"process/browser.js":2,"timers":3}],4:[function(require,module,exports){
 const jsonld = require('jsonld');
-const { getInitialContext } = require('jsonld/lib/context');
-
-//const puppeteer = require('puppeteer')
-//const {spawn} = require('child_process');
 const axios = require('axios');
 
 var quads;
 var turtle;
 var rdfXml;
+var svg;
 
 //TODO https://github.com/digitalbazaar/jsonld.js Dropdown with different view options
 //TODO Build SVG in external python file/javascript
@@ -287,46 +17,77 @@ var rdfXml;
 //TODO https://github.com/alangrafu/visualRDF
 
 
-document.getElementById('btn1').addEventListener("click", async function () {
-    console.log("Button was pressed.");
-    getMovie();
+document.getElementById('form1').onsubmit = async function (e) {
+    e.preventDefault();
+    await getMovie();
+};
+
+
+document.getElementById('btn1').addEventListener("click", async function (e) {
+    await getMovie();
 });
 
-
-document.getElementById('form1').onsubmit = function (e) {
-    e.preventDefault();
-    getMovie();
+var collection = document.getElementsByClassName("tablinks");
+for (let i = 0; i < collection.length; i++) {
+    console.log(collection[i])
+    collection[i].addEventListener("click", async function (e) {
+        await renewElements();
+    });
 }
 
+function showSpinner() {
+    var spinnerString = "<div class=\"d-flex justify-content-center\">\n" +
+        "<div class=\"spinner-border\" role=\"status\" style=\"display: block\">\n" +
+        "<span class=\"visually-hidden\"></span>\n" +
+        "</div>";
+    document.getElementById('n-quads_container').innerHTML = spinnerString;
+    document.getElementById('turtle_container').innerHTML = spinnerString;
+    document.getElementById('rdf_container').innerHTML = spinnerString;
+    document.getElementById('visual_container').innerHTML = spinnerString;
+}
 
 async function getMovie() {
+    svg = undefined;
+    showSpinner();
     const filmTitle = document.getElementById('filmName').value;
     if (filmTitle == "") {
         document.getElementById('n-quads_container').innerHTML = "Please type in a Movie Name";
-        document.getElementById('graph_scatter_1').innerHTML = "Please type in a Movie Name";
+        document.getElementById('turtle_container').innerHTML = "Please type in a Movie Name";
+        document.getElementById('rdf_container').innerHTML = "Please type in a Movie Name";
+        document.getElementById('visual_container').innerHTML = "Please type in a Movie Name";
         return;
     }
 
     quads = await getQuads(filmTitle);
-    
-    axios.get('http://127.0.0.1:8080/' + filmTitle)
+
+    document.getElementById('n-quads_container').innerHTML = "<p style=\"white-space: pre-wrap\">" + quads + "</p>";
+
+    await axios.get('http://127.0.0.1:8080/' + filmTitle)
         .then(res => {
             console.log(`statusCode: ${res.status}`)
             console.log(res)
             rdfXml = res.data.xml
             turtle = res.data.turtle
+            svg = res.data.svg;
+            console.log(quads)
             console.log(rdfXml)
             console.log(turtle)
+            console.log(svg)
         })
         .catch(error => {
             console.error(error)
         })
- 
-    document.getElementById('n-quads_container').innerHTML = "<p style=\"white-space: pre-wrap\">" + quads + "</p>";
-    d3.json(res, (err, data) => {
-        if (err) return console.warn(err);
-        d3.jsonldvis(data, 'graph_scatter_global_2', { w: 800, h: 600, maxLabelWidth: 250 });
-    });
+
+    // document.getElementById('graph_scatter_1').innerHTML = svg;
+}
+
+async function renewElements() {
+    if (svg != undefined) {
+        document.getElementById('n-quads_container').innerHTML = "<p style=\"white-space: pre-wrap\">" + quads + "</p>";
+        document.getElementById('turtle_container').innerHTML = "<p style=\"white-space: pre-wrap\">" + turtle + "</p>";
+        document.getElementById('rdf_container').innerHTML = "<textarea cols=\"80\" rows=\"20\" style=\"resize: none; border: none\">" + rdfXml + "</textarea>";
+        document.getElementById('visual_container').innerHTML = svg;
+    }
 }
 
 //gets JSON from imdb and converts it to quads
@@ -346,11 +107,11 @@ async function getQuads(filmTitle) {
     console.log(res)
     console.log(response);
 
-    quads = await jsonld.toRDF(response, { format: 'application/n-quads' });
+    quads = await jsonld.toRDF(response, {format: 'application/n-quads'});
     quads = format_quads(quads, filmTitle);
     return quads;
-
 }
+
 //is used in getQuads(filmTitle)
 function format_quads(text, filmTitle) {
     text = text.replace(/_:b0/gi, '&lt;' + "http://schema.org/Movie" + '&gt;');
@@ -358,9 +119,11 @@ function format_quads(text, filmTitle) {
     text = text.replace(/>/gi, '&gt;');
     return text;
 }
-},{"axios":5,"jsonld":50,"jsonld/lib/context":43}],5:[function(require,module,exports){
+
+
+},{"axios":2,"jsonld":48}],2:[function(require,module,exports){
 module.exports = require('./lib/axios');
-},{"./lib/axios":7}],6:[function(require,module,exports){
+},{"./lib/axios":4}],3:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -574,7 +337,7 @@ module.exports = function xhrAdapter(config) {
   });
 };
 
-},{"../cancel/Cancel":8,"../core/buildFullPath":13,"../core/createError":14,"../defaults":20,"./../core/settle":18,"./../helpers/buildURL":23,"./../helpers/cookies":25,"./../helpers/isURLSameOrigin":28,"./../helpers/parseHeaders":30,"./../utils":33}],7:[function(require,module,exports){
+},{"../cancel/Cancel":5,"../core/buildFullPath":10,"../core/createError":11,"../defaults":17,"./../core/settle":15,"./../helpers/buildURL":20,"./../helpers/cookies":22,"./../helpers/isURLSameOrigin":25,"./../helpers/parseHeaders":27,"./../utils":30}],4:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -633,7 +396,7 @@ module.exports = axios;
 // Allow use of default import syntax in TypeScript
 module.exports.default = axios;
 
-},{"./cancel/Cancel":8,"./cancel/CancelToken":9,"./cancel/isCancel":10,"./core/Axios":11,"./core/mergeConfig":17,"./defaults":20,"./env/data":21,"./helpers/bind":22,"./helpers/isAxiosError":27,"./helpers/spread":31,"./utils":33}],8:[function(require,module,exports){
+},{"./cancel/Cancel":5,"./cancel/CancelToken":6,"./cancel/isCancel":7,"./core/Axios":8,"./core/mergeConfig":14,"./defaults":17,"./env/data":18,"./helpers/bind":19,"./helpers/isAxiosError":24,"./helpers/spread":28,"./utils":30}],5:[function(require,module,exports){
 'use strict';
 
 /**
@@ -654,7 +417,7 @@ Cancel.prototype.__CANCEL__ = true;
 
 module.exports = Cancel;
 
-},{}],9:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 'use strict';
 
 var Cancel = require('./Cancel');
@@ -775,14 +538,14 @@ CancelToken.source = function source() {
 
 module.exports = CancelToken;
 
-},{"./Cancel":8}],10:[function(require,module,exports){
+},{"./Cancel":5}],7:[function(require,module,exports){
 'use strict';
 
 module.exports = function isCancel(value) {
   return !!(value && value.__CANCEL__);
 };
 
-},{}],11:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -932,7 +695,7 @@ utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
 
 module.exports = Axios;
 
-},{"../helpers/buildURL":23,"../helpers/validator":32,"./../utils":33,"./InterceptorManager":12,"./dispatchRequest":15,"./mergeConfig":17}],12:[function(require,module,exports){
+},{"../helpers/buildURL":20,"../helpers/validator":29,"./../utils":30,"./InterceptorManager":9,"./dispatchRequest":12,"./mergeConfig":14}],9:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -988,7 +751,7 @@ InterceptorManager.prototype.forEach = function forEach(fn) {
 
 module.exports = InterceptorManager;
 
-},{"./../utils":33}],13:[function(require,module,exports){
+},{"./../utils":30}],10:[function(require,module,exports){
 'use strict';
 
 var isAbsoluteURL = require('../helpers/isAbsoluteURL');
@@ -1010,7 +773,7 @@ module.exports = function buildFullPath(baseURL, requestedURL) {
   return requestedURL;
 };
 
-},{"../helpers/combineURLs":24,"../helpers/isAbsoluteURL":26}],14:[function(require,module,exports){
+},{"../helpers/combineURLs":21,"../helpers/isAbsoluteURL":23}],11:[function(require,module,exports){
 'use strict';
 
 var enhanceError = require('./enhanceError');
@@ -1030,7 +793,7 @@ module.exports = function createError(message, config, code, request, response) 
   return enhanceError(error, config, code, request, response);
 };
 
-},{"./enhanceError":16}],15:[function(require,module,exports){
+},{"./enhanceError":13}],12:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1119,7 +882,7 @@ module.exports = function dispatchRequest(config) {
   });
 };
 
-},{"../cancel/Cancel":8,"../cancel/isCancel":10,"../defaults":20,"./../utils":33,"./transformData":19}],16:[function(require,module,exports){
+},{"../cancel/Cancel":5,"../cancel/isCancel":7,"../defaults":17,"./../utils":30,"./transformData":16}],13:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1164,7 +927,7 @@ module.exports = function enhanceError(error, config, code, request, response) {
   return error;
 };
 
-},{}],17:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -1265,7 +1028,7 @@ module.exports = function mergeConfig(config1, config2) {
   return config;
 };
 
-},{"../utils":33}],18:[function(require,module,exports){
+},{"../utils":30}],15:[function(require,module,exports){
 'use strict';
 
 var createError = require('./createError');
@@ -1292,7 +1055,7 @@ module.exports = function settle(resolve, reject, response) {
   }
 };
 
-},{"./createError":14}],19:[function(require,module,exports){
+},{"./createError":11}],16:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1316,7 +1079,7 @@ module.exports = function transformData(data, headers, fns) {
   return data;
 };
 
-},{"./../defaults":20,"./../utils":33}],20:[function(require,module,exports){
+},{"./../defaults":17,"./../utils":30}],17:[function(require,module,exports){
 (function (process){(function (){
 'use strict';
 
@@ -1454,11 +1217,11 @@ utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
 module.exports = defaults;
 
 }).call(this)}).call(this,require('_process'))
-},{"./adapters/http":6,"./adapters/xhr":6,"./core/enhanceError":16,"./helpers/normalizeHeaderName":29,"./utils":33,"_process":2}],21:[function(require,module,exports){
+},{"./adapters/http":3,"./adapters/xhr":3,"./core/enhanceError":13,"./helpers/normalizeHeaderName":26,"./utils":30,"_process":56}],18:[function(require,module,exports){
 module.exports = {
   "version": "0.26.0"
 };
-},{}],22:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 'use strict';
 
 module.exports = function bind(fn, thisArg) {
@@ -1471,7 +1234,7 @@ module.exports = function bind(fn, thisArg) {
   };
 };
 
-},{}],23:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1543,7 +1306,7 @@ module.exports = function buildURL(url, params, paramsSerializer) {
   return url;
 };
 
-},{"./../utils":33}],24:[function(require,module,exports){
+},{"./../utils":30}],21:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1559,7 +1322,7 @@ module.exports = function combineURLs(baseURL, relativeURL) {
     : baseURL;
 };
 
-},{}],25:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1614,7 +1377,7 @@ module.exports = (
     })()
 );
 
-},{"./../utils":33}],26:[function(require,module,exports){
+},{"./../utils":30}],23:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1630,7 +1393,7 @@ module.exports = function isAbsoluteURL(url) {
   return /^([a-z][a-z\d+\-.]*:)?\/\//i.test(url);
 };
 
-},{}],27:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1645,7 +1408,7 @@ module.exports = function isAxiosError(payload) {
   return utils.isObject(payload) && (payload.isAxiosError === true);
 };
 
-},{"./../utils":33}],28:[function(require,module,exports){
+},{"./../utils":30}],25:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1715,7 +1478,7 @@ module.exports = (
     })()
 );
 
-},{"./../utils":33}],29:[function(require,module,exports){
+},{"./../utils":30}],26:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -1729,7 +1492,7 @@ module.exports = function normalizeHeaderName(headers, normalizedName) {
   });
 };
 
-},{"../utils":33}],30:[function(require,module,exports){
+},{"../utils":30}],27:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1784,7 +1547,7 @@ module.exports = function parseHeaders(headers) {
   return parsed;
 };
 
-},{"./../utils":33}],31:[function(require,module,exports){
+},{"./../utils":30}],28:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1813,7 +1576,7 @@ module.exports = function spread(callback) {
   };
 };
 
-},{}],32:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 'use strict';
 
 var VERSION = require('../env/data').version;
@@ -1897,7 +1660,7 @@ module.exports = {
   validators: validators
 };
 
-},{"../env/data":21}],33:[function(require,module,exports){
+},{"../env/data":18}],30:[function(require,module,exports){
 'use strict';
 
 var bind = require('./helpers/bind');
@@ -2248,7 +2011,9 @@ module.exports = {
   stripBOM: stripBOM
 };
 
-},{"./helpers/bind":22}],34:[function(require,module,exports){
+},{"./helpers/bind":19}],31:[function(require,module,exports){
+
+},{}],32:[function(require,module,exports){
 /* jshint esversion: 6 */
 /* jslint node: true */
 'use strict';
@@ -2276,7 +2041,7 @@ module.exports = function serialize (object) {
   }, '') + '}';
 };
 
-},{}],35:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 /*
  * Copyright (c) 2019 Digital Bazaar, Inc. All rights reserved.
  */
@@ -2539,7 +2304,7 @@ function _resolveContextUrls({context, base}) {
   }
 }
 
-},{"./JsonLdError":36,"./ResolvedContext":40,"./types":54,"./url":55,"./util":56}],36:[function(require,module,exports){
+},{"./JsonLdError":34,"./ResolvedContext":38,"./types":52,"./url":53,"./util":54}],34:[function(require,module,exports){
 /*
  * Copyright (c) 2017 Digital Bazaar, Inc. All rights reserved.
  */
@@ -2564,7 +2329,7 @@ module.exports = class JsonLdError extends Error {
   }
 };
 
-},{}],37:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 /*
  * Copyright (c) 2017 Digital Bazaar, Inc. All rights reserved.
  */
@@ -2618,7 +2383,7 @@ module.exports = jsonld => {
   return JsonLdProcessor;
 };
 
-},{}],38:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 /*
  * Copyright (c) 2017 Digital Bazaar, Inc. All rights reserved.
  */
@@ -2627,7 +2392,7 @@ module.exports = jsonld => {
 // TODO: move `NQuads` to its own package
 module.exports = require('rdf-canonize').NQuads;
 
-},{"rdf-canonize":58}],39:[function(require,module,exports){
+},{"rdf-canonize":57}],37:[function(require,module,exports){
 /*
  * Copyright (c) 2017-2019 Digital Bazaar, Inc. All rights reserved.
  */
@@ -2667,7 +2432,7 @@ module.exports = class RequestQueue {
   }
 };
 
-},{}],40:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 /*
  * Copyright (c) 2019 Digital Bazaar, Inc. All rights reserved.
  */
@@ -2699,7 +2464,7 @@ module.exports = class ResolvedContext {
   }
 };
 
-},{"lru-cache":57}],41:[function(require,module,exports){
+},{"lru-cache":55}],39:[function(require,module,exports){
 /*
  * Copyright (c) 2017 Digital Bazaar, Inc. All rights reserved.
  */
@@ -3879,7 +3644,7 @@ function _checkNestProperty(activeCtx, nestProperty, options) {
   }
 }
 
-},{"./JsonLdError":36,"./context":43,"./graphTypes":49,"./types":54,"./url":55,"./util":56}],42:[function(require,module,exports){
+},{"./JsonLdError":34,"./context":41,"./graphTypes":47,"./types":52,"./url":53,"./util":54}],40:[function(require,module,exports){
 /*
  * Copyright (c) 2017 Digital Bazaar, Inc. All rights reserved.
  */
@@ -3913,7 +3678,7 @@ module.exports = {
   XSD_STRING: XSD + 'string',
 };
 
-},{}],43:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 /*
  * Copyright (c) 2017-2019 Digital Bazaar, Inc. All rights reserved.
  */
@@ -5385,7 +5150,7 @@ function _deepCompare(x1, x2) {
   return true;
 }
 
-},{"./JsonLdError":36,"./types":54,"./url":55,"./util":56}],44:[function(require,module,exports){
+},{"./JsonLdError":34,"./types":52,"./url":53,"./util":54}],42:[function(require,module,exports){
 /*
  * Copyright (c) 2017 Digital Bazaar, Inc. All rights reserved.
  */
@@ -5504,7 +5269,7 @@ function _get(xhr, url, headers) {
   });
 }
 
-},{"../JsonLdError":36,"../RequestQueue":39,"../constants":42,"../url":55,"../util":56}],45:[function(require,module,exports){
+},{"../JsonLdError":34,"../RequestQueue":37,"../constants":40,"../url":53,"../util":54}],43:[function(require,module,exports){
 /*
  * Copyright (c) 2017 Digital Bazaar, Inc. All rights reserved.
  */
@@ -6621,7 +6386,7 @@ async function _expandIndexMap(
   return rval;
 }
 
-},{"./JsonLdError":36,"./context":43,"./graphTypes":49,"./types":54,"./url":55,"./util":56}],46:[function(require,module,exports){
+},{"./JsonLdError":34,"./context":41,"./graphTypes":47,"./types":52,"./url":53,"./util":54}],44:[function(require,module,exports){
 /*
  * Copyright (c) 2017 Digital Bazaar, Inc. All rights reserved.
  */
@@ -6661,7 +6426,7 @@ api.flatten = input => {
   return flattened;
 };
 
-},{"./graphTypes":49,"./nodeMap":51}],47:[function(require,module,exports){
+},{"./graphTypes":47,"./nodeMap":49}],45:[function(require,module,exports){
 /*
  * Copyright (c) 2017 Digital Bazaar, Inc. All rights reserved.
  */
@@ -7488,7 +7253,7 @@ function _valueMatch(pattern, value) {
   return true;
 }
 
-},{"./JsonLdError":36,"./context":43,"./graphTypes":49,"./nodeMap":51,"./types":54,"./url":55,"./util":56}],48:[function(require,module,exports){
+},{"./JsonLdError":34,"./context":41,"./graphTypes":47,"./nodeMap":49,"./types":52,"./url":53,"./util":54}],46:[function(require,module,exports){
 /*
  * Copyright (c) 2017 Digital Bazaar, Inc. All rights reserved.
  */
@@ -7837,7 +7602,7 @@ function _RDFToObject(o, useNativeTypes, rdfDirection) {
   return rval;
 }
 
-},{"./JsonLdError":36,"./constants":42,"./graphTypes":49,"./types":54,"./util":56}],49:[function(require,module,exports){
+},{"./JsonLdError":34,"./constants":40,"./graphTypes":47,"./types":52,"./util":54}],47:[function(require,module,exports){
 /*
  * Copyright (c) 2017 Digital Bazaar, Inc. All rights reserved.
  */
@@ -7958,7 +7723,7 @@ api.isBlankNode = v => {
   return false;
 };
 
-},{"./types":54}],50:[function(require,module,exports){
+},{"./types":52}],48:[function(require,module,exports){
 /**
  * A JavaScript implementation of the JSON-LD API.
  *
@@ -8987,7 +8752,7 @@ wrapper(factory);
 // export API
 module.exports = factory;
 
-},{"./ContextResolver":35,"./JsonLdError":36,"./JsonLdProcessor":37,"./NQuads":38,"./RequestQueue":39,"./compact":41,"./context":43,"./expand":45,"./flatten":46,"./frame":47,"./fromRdf":48,"./graphTypes":49,"./nodeMap":51,"./platform":52,"./toRdf":53,"./types":54,"./url":55,"./util":56,"lru-cache":57,"rdf-canonize":58}],51:[function(require,module,exports){
+},{"./ContextResolver":33,"./JsonLdError":34,"./JsonLdProcessor":35,"./NQuads":36,"./RequestQueue":37,"./compact":39,"./context":41,"./expand":43,"./flatten":44,"./frame":45,"./fromRdf":46,"./graphTypes":47,"./nodeMap":49,"./platform":50,"./toRdf":51,"./types":52,"./url":53,"./util":54,"lru-cache":55,"rdf-canonize":57}],49:[function(require,module,exports){
 /*
  * Copyright (c) 2017 Digital Bazaar, Inc. All rights reserved.
  */
@@ -9279,7 +9044,7 @@ api.mergeNodeMaps = graphs => {
   return defaultGraph;
 };
 
-},{"./JsonLdError":36,"./context":43,"./graphTypes":49,"./types":54,"./util":56}],52:[function(require,module,exports){
+},{"./JsonLdError":34,"./context":41,"./graphTypes":47,"./types":52,"./util":54}],50:[function(require,module,exports){
 /*
  * Copyright (c) 2021 Digital Bazaar, Inc. All rights reserved.
  */
@@ -9320,7 +9085,7 @@ api.setupGlobals = function(jsonld) {
   }
 };
 
-},{"./documentLoaders/xhr":44}],53:[function(require,module,exports){
+},{"./documentLoaders/xhr":42}],51:[function(require,module,exports){
 /*
  * Copyright (c) 2017 Digital Bazaar, Inc. All rights reserved.
  */
@@ -9602,7 +9367,7 @@ function _objectToRDF(item, issuer, dataset, graphTerm, rdfDirection) {
   return object;
 }
 
-},{"./constants":42,"./context":43,"./graphTypes":49,"./nodeMap":51,"./types":54,"./url":55,"./util":56,"canonicalize":34}],54:[function(require,module,exports){
+},{"./constants":40,"./context":41,"./graphTypes":47,"./nodeMap":49,"./types":52,"./url":53,"./util":54,"canonicalize":32}],52:[function(require,module,exports){
 /*
  * Copyright (c) 2017 Digital Bazaar, Inc. All rights reserved.
  */
@@ -9696,7 +9461,7 @@ api.isString = v => (typeof v === 'string' ||
  */
 api.isUndefined = v => typeof v === 'undefined';
 
-},{}],55:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 /*
  * Copyright (c) 2017 Digital Bazaar, Inc. All rights reserved.
  */
@@ -9999,7 +9764,7 @@ api.isAbsolute = v => types.isString(v) && isAbsoluteRegex.test(v);
  */
 api.isRelative = v => types.isString(v);
 
-},{"./types":54}],56:[function(require,module,exports){
+},{"./types":52}],54:[function(require,module,exports){
 /*
  * Copyright (c) 2017-2019 Digital Bazaar, Inc. All rights reserved.
  */
@@ -10452,7 +10217,7 @@ function _labelBlankNodes(issuer, element) {
   return element;
 }
 
-},{"./JsonLdError":36,"./graphTypes":49,"./types":54,"rdf-canonize":58}],57:[function(require,module,exports){
+},{"./JsonLdError":34,"./graphTypes":47,"./types":52,"rdf-canonize":57}],55:[function(require,module,exports){
 'use strict'
 
 // A linked list to keep track of recently-used-ness
@@ -10788,7 +10553,193 @@ const forEachStep = (self, fn, node, thisp) => {
 
 module.exports = LRUCache
 
-},{"yallist":70}],58:[function(require,module,exports){
+},{"yallist":70}],56:[function(require,module,exports){
+// shim for using process in browser
+var process = module.exports = {};
+
+// cached from whatever global is present so that test runners that stub it
+// don't break things.  But we need to wrap it in a try catch in case it is
+// wrapped in strict mode code which doesn't define any globals.  It's inside a
+// function because try/catches deoptimize in certain engines.
+
+var cachedSetTimeout;
+var cachedClearTimeout;
+
+function defaultSetTimout() {
+    throw new Error('setTimeout has not been defined');
+}
+function defaultClearTimeout () {
+    throw new Error('clearTimeout has not been defined');
+}
+(function () {
+    try {
+        if (typeof setTimeout === 'function') {
+            cachedSetTimeout = setTimeout;
+        } else {
+            cachedSetTimeout = defaultSetTimout;
+        }
+    } catch (e) {
+        cachedSetTimeout = defaultSetTimout;
+    }
+    try {
+        if (typeof clearTimeout === 'function') {
+            cachedClearTimeout = clearTimeout;
+        } else {
+            cachedClearTimeout = defaultClearTimeout;
+        }
+    } catch (e) {
+        cachedClearTimeout = defaultClearTimeout;
+    }
+} ())
+function runTimeout(fun) {
+    if (cachedSetTimeout === setTimeout) {
+        //normal enviroments in sane situations
+        return setTimeout(fun, 0);
+    }
+    // if setTimeout wasn't available but was latter defined
+    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+        cachedSetTimeout = setTimeout;
+        return setTimeout(fun, 0);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedSetTimeout(fun, 0);
+    } catch(e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+            return cachedSetTimeout.call(null, fun, 0);
+        } catch(e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+            return cachedSetTimeout.call(this, fun, 0);
+        }
+    }
+
+
+}
+function runClearTimeout(marker) {
+    if (cachedClearTimeout === clearTimeout) {
+        //normal enviroments in sane situations
+        return clearTimeout(marker);
+    }
+    // if clearTimeout wasn't available but was latter defined
+    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+        cachedClearTimeout = clearTimeout;
+        return clearTimeout(marker);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedClearTimeout(marker);
+    } catch (e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+            return cachedClearTimeout.call(null, marker);
+        } catch (e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+            return cachedClearTimeout.call(this, marker);
+        }
+    }
+
+
+
+}
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
+
+function cleanUpNextTick() {
+    if (!draining || !currentQueue) {
+        return;
+    }
+    draining = false;
+    if (currentQueue.length) {
+        queue = currentQueue.concat(queue);
+    } else {
+        queueIndex = -1;
+    }
+    if (queue.length) {
+        drainQueue();
+    }
+}
+
+function drainQueue() {
+    if (draining) {
+        return;
+    }
+    var timeout = runTimeout(cleanUpNextTick);
+    draining = true;
+
+    var len = queue.length;
+    while(len) {
+        currentQueue = queue;
+        queue = [];
+        while (++queueIndex < len) {
+            if (currentQueue) {
+                currentQueue[queueIndex].run();
+            }
+        }
+        queueIndex = -1;
+        len = queue.length;
+    }
+    currentQueue = null;
+    draining = false;
+    runClearTimeout(timeout);
+}
+
+process.nextTick = function (fun) {
+    var args = new Array(arguments.length - 1);
+    if (arguments.length > 1) {
+        for (var i = 1; i < arguments.length; i++) {
+            args[i - 1] = arguments[i];
+        }
+    }
+    queue.push(new Item(fun, args));
+    if (queue.length === 1 && !draining) {
+        runTimeout(drainQueue);
+    }
+};
+
+// v8 likes predictible objects
+function Item(fun, array) {
+    this.fun = fun;
+    this.array = array;
+}
+Item.prototype.run = function () {
+    this.fun.apply(null, this.array);
+};
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+process.versions = {};
+
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+process.prependListener = noop;
+process.prependOnceListener = noop;
+
+process.listeners = function (name) { return [] }
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+};
+
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+process.umask = function() { return 0; };
+
+},{}],57:[function(require,module,exports){
 /**
  * An implementation of the RDF Dataset Normalization specification.
  *
@@ -10798,7 +10749,7 @@ module.exports = LRUCache
  */
 module.exports = require('./lib');
 
-},{"./lib":67}],59:[function(require,module,exports){
+},{"./lib":66}],58:[function(require,module,exports){
 /*
  * Copyright (c) 2016-2021 Digital Bazaar, Inc. All rights reserved.
  */
@@ -10880,7 +10831,7 @@ module.exports = class IdentifierIssuer {
   }
 };
 
-},{}],60:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 /*
  * Copyright (c) 2016-2021 Digital Bazaar, Inc. All rights reserved.
  */
@@ -10931,7 +10882,7 @@ module.exports = class MessageDigest {
   }
 };
 
-},{"setimmediate":68}],61:[function(require,module,exports){
+},{"setimmediate":67}],60:[function(require,module,exports){
 /*
  * Copyright (c) 2016-2021 Digital Bazaar, Inc. All rights reserved.
  */
@@ -11326,7 +11277,7 @@ function _unescape(s) {
   });
 }
 
-},{}],62:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 /*
  * Copyright (c) 2016-2021 Digital Bazaar, Inc. All rights reserved.
  */
@@ -11413,7 +11364,7 @@ module.exports = class Permuter {
   }
 };
 
-},{}],63:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 (function (setImmediate){(function (){
 /*
  * Copyright (c) 2016-2021 Digital Bazaar, Inc. All rights reserved.
@@ -11927,7 +11878,7 @@ function _stringHashCompare(a, b) {
 }
 
 }).call(this)}).call(this,require("timers").setImmediate)
-},{"./IdentifierIssuer":59,"./MessageDigest":60,"./NQuads":61,"./Permuter":62,"timers":3}],64:[function(require,module,exports){
+},{"./IdentifierIssuer":58,"./MessageDigest":59,"./NQuads":60,"./Permuter":61,"timers":68}],63:[function(require,module,exports){
 /*
  * Copyright (c) 2016-2021 Digital Bazaar, Inc. All rights reserved.
  */
@@ -12417,7 +12368,7 @@ function _stringHashCompare(a, b) {
   return a.hash < b.hash ? -1 : a.hash > b.hash ? 1 : 0;
 }
 
-},{"./IdentifierIssuer":59,"./MessageDigest":60,"./NQuads":61,"./Permuter":62}],65:[function(require,module,exports){
+},{"./IdentifierIssuer":58,"./MessageDigest":59,"./NQuads":60,"./Permuter":61}],64:[function(require,module,exports){
 /*
  * Copyright (c) 2016-2021 Digital Bazaar, Inc. All rights reserved.
  */
@@ -12509,7 +12460,7 @@ module.exports = class URDNA2012 extends URDNA2015 {
   }
 };
 
-},{"./URDNA2015":63}],66:[function(require,module,exports){
+},{"./URDNA2015":62}],65:[function(require,module,exports){
 /*
  * Copyright (c) 2016-2021 Digital Bazaar, Inc. All rights reserved.
  */
@@ -12595,7 +12546,7 @@ module.exports = class URDNA2012Sync extends URDNA2015Sync {
   }
 };
 
-},{"./URDNA2015Sync":64}],67:[function(require,module,exports){
+},{"./URDNA2015Sync":63}],66:[function(require,module,exports){
 /**
  * An implementation of the RDF Dataset Normalization specification.
  * This library works in the browser and node.js.
@@ -12742,7 +12693,7 @@ api._canonizeSync = function(dataset, options) {
     'Invalid RDF Dataset Canonicalization algorithm: ' + options.algorithm);
 };
 
-},{"./IdentifierIssuer":59,"./NQuads":61,"./URDNA2015":63,"./URDNA2015Sync":64,"./URGNA2012":65,"./URGNA2012Sync":66,"rdf-canonize-native":1}],68:[function(require,module,exports){
+},{"./IdentifierIssuer":58,"./NQuads":60,"./URDNA2015":62,"./URDNA2015Sync":63,"./URGNA2012":64,"./URGNA2012Sync":65,"rdf-canonize-native":31}],67:[function(require,module,exports){
 (function (process,global){(function (){
 (function (global, undefined) {
     "use strict";
@@ -12932,7 +12883,86 @@ api._canonizeSync = function(dataset, options) {
 }(typeof self === "undefined" ? typeof global === "undefined" ? this : global : self));
 
 }).call(this)}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":2}],69:[function(require,module,exports){
+},{"_process":56}],68:[function(require,module,exports){
+(function (setImmediate,clearImmediate){(function (){
+var nextTick = require('process/browser.js').nextTick;
+var apply = Function.prototype.apply;
+var slice = Array.prototype.slice;
+var immediateIds = {};
+var nextImmediateId = 0;
+
+// DOM APIs, for completeness
+
+exports.setTimeout = function() {
+  return new Timeout(apply.call(setTimeout, window, arguments), clearTimeout);
+};
+exports.setInterval = function() {
+  return new Timeout(apply.call(setInterval, window, arguments), clearInterval);
+};
+exports.clearTimeout =
+exports.clearInterval = function(timeout) { timeout.close(); };
+
+function Timeout(id, clearFn) {
+  this._id = id;
+  this._clearFn = clearFn;
+}
+Timeout.prototype.unref = Timeout.prototype.ref = function() {};
+Timeout.prototype.close = function() {
+  this._clearFn.call(window, this._id);
+};
+
+// Does not start the time, just sets up the members needed.
+exports.enroll = function(item, msecs) {
+  clearTimeout(item._idleTimeoutId);
+  item._idleTimeout = msecs;
+};
+
+exports.unenroll = function(item) {
+  clearTimeout(item._idleTimeoutId);
+  item._idleTimeout = -1;
+};
+
+exports._unrefActive = exports.active = function(item) {
+  clearTimeout(item._idleTimeoutId);
+
+  var msecs = item._idleTimeout;
+  if (msecs >= 0) {
+    item._idleTimeoutId = setTimeout(function onTimeout() {
+      if (item._onTimeout)
+        item._onTimeout();
+    }, msecs);
+  }
+};
+
+// That's not how node.js implements it but the exposed api is the same.
+exports.setImmediate = typeof setImmediate === "function" ? setImmediate : function(fn) {
+  var id = nextImmediateId++;
+  var args = arguments.length < 2 ? false : slice.call(arguments, 1);
+
+  immediateIds[id] = true;
+
+  nextTick(function onNextTick() {
+    if (immediateIds[id]) {
+      // fn.call() is faster so we optimize for the common use-case
+      // @see http://jsperf.com/call-apply-segu
+      if (args) {
+        fn.apply(null, args);
+      } else {
+        fn.call(null);
+      }
+      // Prevent ids from leaking
+      exports.clearImmediate(id);
+    }
+  });
+
+  return id;
+};
+
+exports.clearImmediate = typeof clearImmediate === "function" ? clearImmediate : function(id) {
+  delete immediateIds[id];
+};
+}).call(this)}).call(this,require("timers").setImmediate,require("timers").clearImmediate)
+},{"process/browser.js":56,"timers":68}],69:[function(require,module,exports){
 'use strict'
 module.exports = function (Yallist) {
   Yallist.prototype[Symbol.iterator] = function* () {
@@ -13370,4 +13400,4 @@ try {
   require('./iterator.js')(Yallist)
 } catch (er) {}
 
-},{"./iterator.js":69}]},{},[4]);
+},{"./iterator.js":69}]},{},[1]);
