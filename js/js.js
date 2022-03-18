@@ -34,12 +34,25 @@ for (let i = 0; i < collection.length; i++) {
     });
 }
 
+function showSpinner() {
+    var spinnerString = "<div class=\"d-flex justify-content-center\">\n" +
+        "<div class=\"spinner-border\" role=\"status\" style=\"display: block\">\n" +
+        "<span class=\"visually-hidden\"></span>\n" +
+        "</div>"
+    document.getElementById('n-quads_container').innerHTML = spinnerString;
+    document.getElementById('turtle_container').innerHTML = spinnerString;
+    document.getElementById('rdf_container').innerHTML = spinnerString;
+    document.getElementById('visual_container').innerHTML = spinnerString;
+}
 
 async function getMovie() {
+    showSpinner();
     const filmTitle = document.getElementById('filmName').value;
     if (filmTitle == "") {
         document.getElementById('n-quads_container').innerHTML = "Please type in a Movie Name";
-        //    document.getElementById('graph_scatter_1').innerHTML = "Please type in a Movie Name";
+        document.getElementById('turtle_container').innerHTML = "Please type in a Movie Name";
+        document.getElementById('rdf_container').innerHTML = "Please type in a Movie Name";
+        document.getElementById('visual_container').innerHTML = "Please type in a Movie Name";
         return;
     }
 
@@ -67,10 +80,12 @@ async function getMovie() {
 }
 
 async function renewElements() {
-    document.getElementById('n-quads_container').innerHTML = "<p style=\"white-space: pre-wrap\">" + quads + "</p>";
-    document.getElementById('turtle_container').innerHTML = "<p style=\"white-space: pre-wrap\">" + turtle + "</p>";
-    document.getElementById('rdf_container').innerHTML = rdfXml;
-    document.getElementById('visual_container').innerHTML = svg;
+    if (svg != undefined) {
+        document.getElementById('n-quads_container').innerHTML = "<p style=\"white-space: pre-wrap\">" + quads + "</p>";
+        document.getElementById('turtle_container').innerHTML = "<p style=\"white-space: pre-wrap\">" + turtle + "</p>";
+        document.getElementById('rdf_container').innerHTML = "<textarea cols=\"80\" rows=\"20\" style=\"resize: none; border: none\">" + rdfXml + "</textarea>";
+        document.getElementById('visual_container').innerHTML = svg;
+    }
 }
 
 //gets JSON from imdb and converts it to quads
