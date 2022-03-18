@@ -35,7 +35,6 @@ for (let i = 0; i < collection.length; i++) {
 }
 
 function showSpinner() {
-    turtle = undefined;
     var spinnerString = "<div class=\"d-flex justify-content-center\">\n" +
         "<div class=\"spinner-border\" role=\"status\" style=\"display: block\">\n" +
         "<span class=\"visually-hidden\"></span>\n" +
@@ -47,6 +46,7 @@ function showSpinner() {
 }
 
 async function getMovie() {
+    svg = undefined;
     showSpinner();
     const filmTitle = document.getElementById('filmName').value;
     if (filmTitle == "") {
