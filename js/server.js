@@ -179,9 +179,9 @@ async function getGraphRDFGrapher() {
     //read result
     // svg = await page.$eval('#visualized', el => el.innerHTML);
 
-    var begin = "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"  viewBox=\"0.00 0.00 2410.99 1283.54\">"
+    var begin = "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width='100%' height='100%' viewBox=\"0.00 0.00 2000 1500\">"
 
-    svg = begin + svg.substring(svg.search("\n"));
+   // svg = begin + svg.substring(svg.search("\n"));
 
     await browser.close();
 }

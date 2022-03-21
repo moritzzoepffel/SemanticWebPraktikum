@@ -47,15 +47,19 @@ function showSpinner() {
 
 async function getMovie() {
     svg = undefined;
-    showSpinner();
     const filmTitle = document.getElementById('filmName').value;
     if (filmTitle == "") {
-        document.getElementById('n-quads_container').innerHTML = "Please type in a Movie Name";
-        document.getElementById('turtle_container').innerHTML = "Please type in a Movie Name";
-        document.getElementById('rdf_container').innerHTML = "Please type in a Movie Name";
-        document.getElementById('visual_container').innerHTML = "Please type in a Movie Name";
+        alert("Bitte einen Filmtitel eingeben!")
+        /*     document.getElementById('n-quads_container').innerHTML = "Please type in a Movie Name";
+             document.getElementById('turtle_container').innerHTML = "Please type in a Movie Name";
+             document.getElementById('rdf_container').innerHTML = "Please type in a Movie Name";
+             document.getElementById('visual_container').innerHTML = "Please type in a Movie Name";
+
+         */
         return;
     }
+
+    showSpinner();
 
     quads = await getQuads(filmTitle);
 
@@ -77,11 +81,14 @@ async function getMovie() {
             console.error(error)
         });
     await renewElements();
+    let svgElem = document.querySelector('svg');
+    console.log(svgElem.attributes);
+
     // document.getElementById('graph_scatter_1').innerHTML = svg;
 }
 
 async function renewElements() {
-    if (svg != undefined) {
+    if (svg !== undefined) {
         document.getElementById('n-quads_container').innerHTML = "<p style=\"white-space: pre-wrap\">" + quads + "</p>";
         document.getElementById('turtle_container').innerHTML = "<p style=\"white-space: pre-wrap\">" + turtle + "</p>";
         document.getElementById('rdf_container').innerText = rdfXml;
