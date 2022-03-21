@@ -35,10 +35,7 @@ for (let i = 0; i < collection.length; i++) {
 }
 
 function showSpinner() {
-    var spinnerString = "<div class=\"d-flex justify-content-center\">\n" +
-        "<div class=\"spinner-border\" role=\"status\" style=\"display: block\">\n" +
-        "<span class=\"visually-hidden\"></span>\n" +
-        "</div>";
+    var spinnerString = "<div class=\"d-flex justify-content-center\">\n" + "<div class=\"spinner-border\" role=\"status\" style=\"display: block\">\n" + "<span class=\"visually-hidden\"></span>\n" + "</div>";
     document.getElementById('n-quads_container').innerHTML = spinnerString;
     document.getElementById('turtle_container').innerHTML = spinnerString;
     document.getElementById('rdf_container').innerHTML = spinnerString;
@@ -82,7 +79,15 @@ async function getMovie() {
         });
     await renewElements();
     let svgElem = document.querySelector('svg');
-    console.log(svgElem.attributes);
+
+    const nodes = document.getElementsByClassName("node");
+
+    for (let i = 0; i < nodes.length; i++) {
+        const endnum = nodes[i].innerHTML.indexOf("<", 10);
+        const substring = nodes[i].innerHTML.substring(8, endnum);
+        console.log(substring)
+        nodes[i].innerHTML = "<a xlink:href=\"https://www.google.de/search?q=" + substring + "\">" + nodes[i].innerHTML + "</a>";
+    }
 
     // document.getElementById('graph_scatter_1').innerHTML = svg;
 }
