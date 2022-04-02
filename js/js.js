@@ -87,6 +87,7 @@ async function getMovie() {
         const substring = nodes[i].innerHTML.substring(8, endnum);
         console.log(substring)
         nodes[i].innerHTML = "<a href=\"https://www.google.de/search?q=" + substring + "\" target=\"_blank\" rel=\"noopener noreferrer\">" + nodes[i].innerHTML + "</a>";
+        //nodes[i].innerHTML = "<a xlink:href=\"https://www.google.de/search?q=" + substring + "\">" + nodes[i].innerHTML + "</a>";
     }
 
     // document.getElementById('graph_scatter_1').innerHTML = svg;
@@ -98,6 +99,15 @@ async function renewElements() {
         document.getElementById('turtle_container').innerHTML = "<p style=\"white-space: pre-wrap\">" + turtle + "</p>";
         document.getElementById('rdf_container').innerText = rdfXml;
         document.getElementById('visual_container').innerHTML = svg;
+        const nodes = document.getElementsByClassName("node");
+
+        for (let i = 0; i < nodes.length; i++) {
+            const endnum = nodes[i].innerHTML.indexOf("<", 10);
+            const substring = nodes[i].innerHTML.substring(8, endnum);
+            console.log(substring)
+            nodes[i].innerHTML = "<a href=\"https://www.google.de/search?q=" + substring + "\" target=\"_blank\" rel=\"noopener noreferrer\">" + nodes[i].innerHTML + "</a>";
+            //nodes[i].innerHTML = "<a xlink:href=\"https://www.google.de/search?q=" + substring + "\">" + nodes[i].innerHTML + "</a>";
+        }
     }
 }
 
