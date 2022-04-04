@@ -80,7 +80,7 @@ async function getMovie() {
         });
     await renewElements();
     let svgElem = document.querySelector('svg');
-
+    /*
     const nodes = document.getElementsByClassName("node");
 
     for (let i = 0; i < nodes.length; i++) {
@@ -90,7 +90,7 @@ async function getMovie() {
         nodes[i].innerHTML = "<a href=\"https://www.google.de/search?q=" + substring + "\" target=\"_blank\" rel=\"noopener noreferrer\">" + nodes[i].innerHTML + "</a>";
         //nodes[i].innerHTML = "<a xlink:href=\"https://www.google.de/search?q=" + substring + "\">" + nodes[i].innerHTML + "</a>";
     }
-
+    */
     // document.getElementById('graph_scatter_1').innerHTML = svg;
 }
 
